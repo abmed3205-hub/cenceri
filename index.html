@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Espace Privé</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0ea5e9;
+            --primary-dark: #0284c7;
+            --accent-green: #10b981;
+            --accent-green-hover: #059669;
+            --danger: #ef4444;
+            --bg-dark: #0f172a;
+            --bg-light: #f1f5f9;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            width: 100%;
+            min-height: 100vh;
+            font-family: 'Inter', 'Cairo', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-main);
+            overflow-x: hidden;
+        }
+
+        /* ================= الواجهة الأولى: تسجيل الدخول ================= */
+        #login-view {
+            width: 100%;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 400px;
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 20px;
+            padding: 36px 28px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+        }
+
+        .login-icon {
+            width: 56px;
+            height: 56px;
+            background: #e0f2fe;
+            color: var(--primary-dark);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 26px;
+        }
+
+        .login-title {
+            text-align: center;
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--bg-dark);
+            margin-bottom: 6px;
+        }
+
+        .login-subtitle {
+            text-align: center;
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 28px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 8px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
+            font-size: 15px;
+            font-family: 'Inter', sans-serif;
+            color: var(--text-main);
+            background: #f8fafc;
+            transition: all 0.2s ease;
+            outline: none;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            background: #ffffff;
+            box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.12);
+        }
+
+        .toggle-pass {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .error-msg {
+            display: none;
+            background: #fef2f2;
+            color: var(--danger);
+            border: 1px solid #fecaca;
+            padding: 11px 14px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 18px;
+            text-align: center;
+        }
+
+        .btn-connect {
+            width: 100%;
+            padding: 15px;
+            background: var(--accent-green);
+            color: #ffffff;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s ease, transform 0.1s ease;
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.28);
+        }
+
+        .btn-connect:hover {
+            background: var(--accent-green-hover);
+        }
+
+        .btn-connect:active {
+            transform: scale(0.98);
+        }
+
+        /* ================= الواجهة الثانية: لوحة الإدارة ================= */
+        #dashboard-view {
+            display: none;
+            width: 100%;
+            min-height: 100vh;
+            direction: rtl;
+            font-family: 'Cairo', sans-serif;
+            padding-bottom: 40px;
+        }
+
+        .top-bar {
+            background: var(--bg-dark);
+            color: #ffffff;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .top-bar h1 {
+            font-size: 18px;
+            font-weight: 800;
+        }
+
+        .top-bar span {
+            font-size: 12px;
+            color: #94a3b8;
+            display: block;
+        }
+
+        .btn-logout {
+            background: rgba(239, 68, 68, 0.15);
+            color: #fca5a5;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            padding: 7px 12px;
+            border-radius: 8px;
+            font-family: 'Cairo', sans-serif;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 680px;
+            margin: 0 auto;
+            padding: 16px;
+        }
+
+        /* بطاقات الملخص المالي */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            padding: 16px;
+            border-radius: 16px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+            border: 1px solid var(--border);
+        }
+
+        .stat-card.profit {
+            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+            color: #ffffff;
+            border: none;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            font-weight: 600;
+            opacity: 0.85;
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-size: 22px;
+            font-weight: 800;
+            font-family: 'Inter', 'Cairo', sans-serif;
+        }
+
+        /* التبويبات السريعة */
+        .tabs {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            background: #e2e8f0;
+            padding: 5px;
+            border-radius: 14px;
+            margin-bottom: 18px;
+        }
+
+        .tab-btn {
+            padding: 10px 6px;
+            border: none;
+            border-radius: 10px;
+            background: transparent;
+            font-family: 'Cairo', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            background: #ffffff;
+            color: var(--bg-dark);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+        }
+
+        .section-panel {
+            display: none;
+        }
+
+        .section-panel.active {
+            display: block;
+        }
+
+        /* البطاقات العامة */
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 18px;
+            margin-bottom: 16px;
+            border: 1px solid var(--border);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--bg-dark);
+        }
+
+        .dash-input, .dash-select {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            font-family: 'Cairo', sans-serif;
+            font-size: 14px;
+            background: #f8fafc;
+            margin-bottom: 12px;
+            outline: none;
+        }
+
+        .dash-input:focus, .dash-select:focus {
+            border-color: var(--primary);
+            background: #ffffff;
+        }
+
+        .row-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .btn-action {
+            width: 100%;
+            padding: 13px;
+            background: var(--accent-green);
+            color: #ffffff;
+            border: none;
+            border-radius: 12px;
+            font-family: 'Cairo', sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .btn-action.secondary {
+            background: var(--primary-dark);
+        }
+
+        /* عناصر المخزون */
+        .stock-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            margin-bottom: 10px;
+            background: #f8fafc;
+        }
+
+        .stock-info h4 {
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--bg-dark);
+        }
+
+        .stock-meta {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 3px;
+        }
+
+        .stock-badge {
+            background: #e0f2fe;
+            color: var(--primary-dark);
+            padding: 6px 12px;
+            border-radius: 10px;
+            font-weight: 800;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .stock-badge.low {
+            background: #fee2e2;
+            color: var(--danger);
+        }
+
+        /* سجل المبيعات */
+        .sale-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sale-item:last-child {
+            border-bottom: none;
+        }
+
+        .sale-details h4 {
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .sale-details p {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .sale-numbers {
+            text-align: left;
+        }
+
+        .sale-total {
+            font-weight: 800;
+            font-size: 14px;
+            color: var(--bg-dark);
+        }
+
+        .sale-profit {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--accent-green-hover);
+        }
+
+        .btn-del {
+            background: #fee2e2;
+            color: var(--danger);
+            border: none;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 4px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 24px 10px;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ================= الواجهة الأولى: تسجيل الدخول ================= -->
+    <div id="login-view">
+        <div class="login-card">
+            <div class="login-icon">🔒</div>
+            <h2 class="login-title">Connexion</h2>
+            <p class="login-subtitle">Veuillez saisir vos identifiants pour continuer</p>
+
+            <div id="error-box" class="error-msg">
+                Email ou mot de passe incorrect.
+            </div>
+
+            <form id="login-form" novalidate>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" class="form-control" placeholder="exemple@gmail.com" autocomplete="email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Mot de passe</label>
+                    <div class="input-wrapper">
+                        <input type="password" id="password" class="form-control" placeholder="••••••••••" autocomplete="current-password" required>
+                        <button type="button" class="toggle-pass" onclick="togglePassword()">Afficher</button>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-connect">Se connecter</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ================= الواجهة الثانية: لوحة متابعة الحديد والكنكري ================= -->
+    <div id="dashboard-view">
+        <div class="top-bar">
+            <div>
+                <h1>متابعة المخزون والمبيعات</h1>
+                <span id="current-date"></span>
+            </div>
+            <button class="btn-logout" onclick="logout()">خروج</button>
+        </div>
+
+        <div class="container">
+            <!-- ملخص اليوم -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">مبيعات اليوم</div>
+                    <div class="stat-value" id="today-sales">0</div>
+                </div>
+                <div class="stat-card profit">
+                    <div class="stat-label">صافي ربح اليوم</div>
+                    <div class="stat-value" id="today-profit">0</div>
+                </div>
+            </div>
+
+            <!-- التبويبات -->
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab('sell-tab', this)">تسجيل بيع</button>
+                <button class="tab-btn" onclick="switchTab('stock-tab', this)">المخزون</button>
+                <button class="tab-btn" onclick="switchTab('history-tab', this)">سجل اليوم</button>
+            </div>
+
+            <!-- القسم 1: تسجيل بيع جديد -->
+            <div id="sell-tab" class="section-panel active">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">عملية بيع جديدة</h3>
+                    </div>
+
+                    <label style="font-size:13px; font-weight:700; display:block; margin-bottom:6px;">اختر المادة (حديد / كنكري)</label>
+                    <select id="sell-item-select" class="dash-select" onchange="fillDefaultSellPrice()"></select>
+
+                    <div class="row-2">
+                        <div>
+                            <label style="font-size:13px; font-weight:700; display:block; margin-bottom:6px;">الكمية المباعة</label>
+                            <input type="number" id="sell-qty" class="dash-input" placeholder="مثال: 2" step="any" min="0.01">
+                        </div>
+                        <div>
+                            <label style="font-size:13px; font-weight:700; display:block; margin-bottom:6px;">سعر بيع الوحدة</label>
+                            <input type="number" id="sell-price" class="dash-input" placeholder="السعر" step="any" min="0">
+                        </div>
+                    </div>
+
+                    <button class="btn-action" onclick="recordSale()">تأكيد البيع وحساب الربح</button>
+                </div>
+
+                <!-- ملخص سريع للمخزون تحت البيع -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">نظرة سريعة على المتوفر</h3>
+                    </div>
+                    <div id="quick-stock-list"></div>
+                </div>
+            </div>
+
+            <!-- القسم 2: إدارة المخزون (الحديد والكنكري) -->
+            <div id="stock-tab" class="section-panel">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">إضافة سلعة أو تزويد المخزون</h3>
+                    </div>
+
+                    <input type="text" id="new-item-name" class="dash-input" placeholder="اسم المادة (مثال: حديد 12، حديد 10، كنكري...)">
+                    
+                    <div class="row-2">
+                        <input type="number" id="new-item-qty" class="dash-input" placeholder="الكمية المضافة" step="any" min="0">
+                        <input type="text" id="new-item-unit" class="dash-input" placeholder="الوحدة (طن / متر / حبة)">
+                    </div>
+
+                    <div class="row-2">
+                        <input type="number" id="new-item-cost" class="dash-input" placeholder="سعر الشراء (التكلفة)" step="any" min="0">
+                        <input type="number" id="new-item-price" class="dash-input" placeholder="سعر البيع الافتراضي" step="any" min="0">
+                    </div>
+
+                    <button class="btn-action secondary" onclick="addOrUpdateStock()">حفظ في المخزون</button>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">كل المواد المتوفرة حالياً</h3>
+                    </div>
+                    <div id="full-stock-list"></div>
+                </div>
+            </div>
+
+            <!-- القسم 3: سجل مبيعات اليوم -->
+            <div id="history-tab" class="section-panel">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">تفاصيل مبيعات اليوم</h3>
+                        <button onclick="resetTodaySales()" style="background:none; border:none; color:var(--danger); font-family:'Cairo'; font-size:12px; font-weight:700; cursor:pointer;">تصفير اليوم</button>
+                    </div>
+                    <div id="sales-history-list"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ================= بيانات الدخول المعتمدة =================
+        const VALID_EMAIL = "Abmed3205@gmail.com";
+        const VALID_PASS = "36654787Ab";
+
+        const loginView = document.getElementById('login-view');
+        const dashboardView = document.getElementById('dashboard-view');
+        const loginForm = document.getElementById('login-form');
+        const errorBox = document.getElementById('error-box');
+
+        // التحقق من حالة الجلسة عند فتح الصفحة
+        if (sessionStorage.getItem('isLoggedIn') === 'true') {
+            showDashboard();
+        }
+
+        // إظهار / إخفاء كلمة المرور
+        function togglePassword() {
+            const passInput = document.getElementById('password');
+            const btn = document.querySelector('.toggle-pass');
+            if (passInput.type === 'password') {
+                passInput.type = 'text';
+                btn.textContent = 'Masquer';
+            } else {
+                passInput.type = 'password';
+                btn.textContent = 'Afficher';
+            }
+        }
+
+        // معالجة زر Se connecter
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const emailVal = document.getElementById('email').value.trim();
+            const passVal = document.getElementById('password').value.trim();
+
+            if (emailVal.toLowerCase() === VALID_EMAIL.toLowerCase() && passVal === VALID_PASS) {
+                errorBox.style.display = 'none';
+                sessionStorage.setItem('isLoggedIn', 'true');
+                showDashboard();
+            } else {
+                errorBox.style.display = 'block';
+            }
+        });
+
+        function showDashboard() {
+            loginView.style.display = 'none';
+            dashboardView.style.display = 'block';
+            initDashboard();
+        }
+
+        function logout() {
+            sessionStorage.removeItem('isLoggedIn');
+            document.getElementById('password').value = '';
+            dashboardView.style.display = 'none';
+            loginView.style.display = 'flex';
+        }
+
+        // ================= منطق لوحة التحكم (الحديد والكنكري) =================
+        let inventory = JSON.parse(localStorage.getItem('dad_inventory')) || [
+            { id: 1, name: "حديد 12", qty: 10, unit: "طن", cost: 8000, price: 8500 },
+            { id: 2, name: "حديد 10", qty: 8, unit: "طن", cost: 8100, price: 8600 },
+            { id: 3, name: "حديد 8", qty: 5, unit: "طن", cost: 8200, price: 8700 },
+            { id: 4, name: "كنكري", qty: 40, unit: "متر", cost: 150, price: 200 }
+        ];
+
+        let sales = JSON.parse(localStorage.getItem('dad_sales')) || [];
+
+        function saveData() {
+            localStorage.setItem('dad_inventory', JSON.stringify(inventory));
+            localStorage.setItem('dad_sales', JSON.stringify(sales));
+        }
+
+        function initDashboard() {
+            const now = new Date();
+            document.getElementById('current-date').textContent = now.toLocaleDateString('ar-MA', {
+                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+            });
+            renderAll();
+        }
+
+        function switchTab(tabId, btn) {
+            document.querySelectorAll('.section-panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            btn.classList.add('active');
+        }
+
+        function renderAll() {
+            renderSelect();
+            renderStockLists();
+            renderSalesHistory();
+            updateTotals();
+        }
+
+        function renderSelect() {
+            const select = document.getElementById('sell-item-select');
+            select.innerHTML = '';
+            inventory.forEach(item => {
+                const opt = document.createElement('option');
+                opt.value = item.id;
+                opt.textContent = `${item.name} (المتوفر: ${item.qty} ${item.unit})`;
+                select.appendChild(opt);
+            });
+            fillDefaultSellPrice();
+        }
+
+        function fillDefaultSellPrice() {
+            const select = document.getElementById('sell-item-select');
+            const item = inventory.find(i => i.id == select.value);
+            if (item) {
+                document.getElementById('sell-price').value = item.price;
+            }
+        }
+
+        function renderStockLists() {
+            const quickList = document.getElementById('quick-stock-list');
+            const fullList = document.getElementById('full-stock-list');
+            quickList.innerHTML = '';
+            fullList.innerHTML = '';
+
+            if (inventory.length === 0) {
+                const empty = '<div class="empty-state">لا توجد مواد مسجلة حالياً</div>';
+                quickList.innerHTML = empty;
+                fullList.innerHTML = empty;
+                return;
+            }
+
+            inventory.forEach(item => {
+                const isLow = item.qty <= 2;
+                const html = `
+                    <div class="stock-item">
+                        <div class="stock-info">
+                            <h4>${item.name}</h4>
+                            <div class="stock-meta">التكلفة: ${item.cost} | البيع: ${item.price}</div>
+                        </div>
+                        <div class="stock-badge ${isLow ? 'low' : ''}">
+                            ${item.qty} ${item.unit}
+                        </div>
+                    </div>
+                `;
+                quickList.innerHTML += html;
+                fullList.innerHTML += `
+                    <div class="stock-item">
+                        <div class="stock-info">
+                            <h4>${item.name}</h4>
+                            <div class="stock-meta">التكلفة: ${item.cost} | البيع: ${item.price}</div>
+                            <button class="btn-del" onclick="deleteStockItem(${item.id})">حذف الصنف</button>
+                        </div>
+                        <div class="stock-badge ${isLow ? 'low' : ''}">
+                            ${item.qty} ${item.unit}
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function recordSale() {
+            const itemId = document.getElementById('sell-item-select').value;
+            const qty = parseFloat(document.getElementById('sell-qty').value);
+            const sellPrice = parseFloat(document.getElementById('sell-price').value);
+
+            if (!itemId || isNaN(qty) || qty <= 0 || isNaN(sellPrice) || sellPrice < 0) {
+                alert("يرجى إدخال الكمية والسعر بشكل صحيح.");
+                return;
+            }
+
+            const item = inventory.find(i => i.id == itemId);
+            if (!item) return;
+
+            if (qty > item.qty) {
+                alert(`الكمية المطلوبة أكبر من المتوفر في المخزون (${item.qty} ${item.unit})`);
+                return;
+            }
+
+            // خصم من المخزون
+            item.qty = Number((item.qty - qty).toFixed(3));
+
+            // حساب المجموع والربح
+            const totalAmount = qty * sellPrice;
+            const profitAmount = (sellPrice - item.cost) * qty;
+
+            const timeStr = new Date().toLocaleTimeString('ar-MA', { hour: '2-digit', minute: '2-digit' });
+
+            sales.unshift({
+                id: Date.now(),
+                itemId: item.id,
+                name: item.name,
+                unit: item.unit,
+                qty: qty,
+                sellPrice: sellPrice,
+                total: totalAmount,
+                profit: profitAmount,
+                time: timeStr
+            });
+
+            document.getElementById('sell-qty').value = '';
+            saveData();
+            renderAll();
+            alert("تم تسجيل البيع بنجاح!");
+        }
+
+        function addOrUpdateStock() {
+            const name = document.getElementById('new-item-name').value.trim();
+            const qty = parseFloat(document.getElementById('new-item-qty').value);
+            const unit = document.getElementById('new-item-unit').value.trim() || "وحدة";
+            const cost = parseFloat(document.getElementById('new-item-cost').value);
+            const price = parseFloat(document.getElementById('new-item-price').value);
+
+            if (!name || isNaN(qty) || qty < 0 || isNaN(cost) || isNaN(price)) {
+                alert("يرجى ملء جميع الخانات بشكل صحيح.");
+                return;
+            }
+
+            const existing = inventory.find(i => i.name.toLowerCase() === name.toLowerCase());
+            if (existing) {
+                existing.qty = Number((existing.qty + qty).toFixed(3));
+                existing.cost = cost;
+                existing.price = price;
+                if (unit) existing.unit = unit;
+            } else {
+                inventory.push({
+                    id: Date.now(),
+                    name: name,
+                    qty: qty,
+                    unit: unit,
+                    cost: cost,
+                    price: price
+                });
+            }
+
+            document.getElementById('new-item-name').value = '';
+            document.getElementById('new-item-qty').value = '';
+            document.getElementById('new-item-unit').value = '';
+            document.getElementById('new-item-cost').value = '';
+            document.getElementById('new-item-price').value = '';
+
+            saveData();
+            renderAll();
+            alert("تم تحديث المخزون بنجاح!");
+        }
+
+        function deleteStockItem(id) {
+            if (confirm("هل تريد حذف هذا الصنف من المخزون؟")) {
+                inventory = inventory.filter(i => i.id !== id);
+                saveData();
+                renderAll();
+            }
+        }
+
+        function renderSalesHistory() {
+            const list = document.getElementById('sales-history-list');
+            list.innerHTML = '';
+
+            if (sales.length === 0) {
+                list.innerHTML = '<div class="empty-state">لم يتم تسجيل أي مبيعات اليوم بعد</div>';
+                return;
+            }
+
+            sales.forEach(s => {
+                list.innerHTML += `
+                    <div class="sale-item">
+                        <div class="sale-details">
+                            <h4>${s.name} (${s.qty} ${s.unit})</h4>
+                            <p>الساعة: ${s.time} | سعر الوحدة: ${s.sellPrice}</p>
+                        </div>
+                        <div class="sale-numbers">
+                            <div class="sale-total">${s.total.toLocaleString()}</div>
+                            <div class="sale-profit">الربح: +${s.profit.toLocaleString()}</div>
+                            <button class="btn-del" onclick="undoSale(${s.id})">إلغاء</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function undoSale(saleId) {
+            const sale = sales.find(s => s.id === saleId);
+            if (!sale) return;
+
+            if (confirm("إلغاء هذه العملية وإرجاع الكمية للمخزون؟")) {
+                const item = inventory.find(i => i.id === sale.itemId);
+                if (item) {
+                    item.qty = Number((item.qty + sale.qty).toFixed(3));
+                }
+                sales = sales.filter(s => s.id !== saleId);
+                saveData();
+                renderAll();
+            }
+        }
+
+        function resetTodaySales() {
+            if (confirm("هل تريد تصفير سجل مبيعات وأرباح اليوم؟ (المخزون سيبقى كما هو)")) {
+                sales = [];
+                saveData();
+                renderAll();
+            }
+        }
+
+        function updateTotals() {
+            const totalSales = sales.reduce((sum, s) => sum + s.total, 0);
+            const totalProfit = sales.reduce((sum, s) => sum + s.profit, 0);
+
+            document.getElementById('today-sales').textContent = totalSales.toLocaleString();
+            document.getElementById('today-profit').textContent = totalProfit.toLocaleString();
+        }
+    </script>
+</body>
+</html>
