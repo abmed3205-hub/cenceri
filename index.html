@@ -89,7 +89,7 @@ nav button.active{color:var(--primary);background:var(--primary-soft);font-weigh
     <div class="login-logo">🔒</div>
     <h2>تسجيل الدخول</h2>
     <p>أدخل البريد الإلكتروني وكلمة السر للمتابعة</p>
-    <div id="loginError">البريد الإلكتروني غير صحيح</div>
+    <div id="loginError">المعلومات غير صحيحة</div>
     <form id="loginForm" novalidate>
       <div class="l-field">
         <label for="loginEmail">البريد الإلكتروني (Email)</label>
@@ -97,7 +97,7 @@ nav button.active{color:var(--primary);background:var(--primary-soft);font-weigh
       </div>
       <div class="l-field">
         <label for="loginPass">كلمة السر (Mot de passe)</label>
-        <input type="password" id="loginPass" placeholder="••••••••••" autocomplete="current-password" required>
+        <input type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password" required>
       </div>
       <button type="submit" class="btn block">Se connecter</button>
     </form>
@@ -118,7 +118,8 @@ nav button.active{color:var(--primary);background:var(--primary-soft);font-weigh
 
 <script>
 /* منطق الواجهة الأولى */
-const ALLOWED_EMAIL = "ab.med3205@gmail.com";
+const ALLOWED_EMAIL = "abmed3205@gmail.com";
+const ALLOWED_PASS = "36654787";
 const loginScreen = document.getElementById("loginScreen");
 const loginForm = document.getElementById("loginForm");
 const loginError = document.getElementById("loginError");
@@ -131,7 +132,7 @@ loginForm.addEventListener("submit", function(e) {
   e.preventDefault();
   const emailVal = document.getElementById("loginEmail").value.trim().toLowerCase();
   const passVal = document.getElementById("loginPass").value.trim();
-  if (emailVal === ALLOWED_EMAIL && passVal.length > 0) {
+  if (emailVal === ALLOWED_EMAIL && passVal === ALLOWED_PASS) {
     loginError.style.display = "none";
     sessionStorage.setItem("depot_logged_in", "1");
     loginScreen.style.display = "none";
