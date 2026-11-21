@@ -55,8 +55,9 @@ h1{font-size:1.6rem;margin:10px 0 4px}
 .row{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line)}
 .row:last-child{border-bottom:0}
 .row .meta{flex:1;min-width:0}
-.row .name{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.row .sub2{color:var(--muted);font-size:.85rem;margin-top:2px;overflow:hidden;text-overflow:ellipsis}
+.row .name{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .sub2{color:var(--muted);font-size:.85rem;margin-top:3px;line-height:1.45}
+.row .op-meta-line{color:var(--text);opacity:.85;font-size:.82rem;margin-top:4px;direction:ltr;text-align:start}
 .amount{font-weight:700;direction:ltr;white-space:nowrap}
 .badge{font-size:.78rem;padding:4px 10px;border-radius:99px;white-space:nowrap;font-weight:600;display:inline-block;margin-top:4px}
 .b-ok{background:var(--green-soft);color:var(--green)}
@@ -210,7 +211,7 @@ const I18N = {
     homeSub: "ملخص نشاط مخزنك",
     newSaleBtn: "+ بيع جديد",
     opsFieldTitle: "العمليات",
-    opsFieldSub: "سجل العمليات الجديدة",
+    opsFieldSub: "سجل العمليات الجديدة بالتفصيل والتاريخ والوقت",
     todaySales: "مبيعات اليوم",
     opsCount: "عملية",
     totalIncome: "إجمالي الدخل",
@@ -277,7 +278,7 @@ const I18N = {
     homeSub: "Résumé de l'activité du dépôt",
     newSaleBtn: "+ Nouvelle vente",
     opsFieldTitle: "Opérations",
-    opsFieldSub: "Nouvelles opérations",
+    opsFieldSub: "Détails, date et heure des opérations",
     todaySales: "Ventes aujourd'hui",
     opsCount: "opération(s)",
     totalIncome: "Revenu total",
@@ -344,7 +345,7 @@ const I18N = {
     homeSub: "Summary of your depot activity",
     newSaleBtn: "+ New sale",
     opsFieldTitle: "Operations",
-    opsFieldSub: "New operations log",
+    opsFieldSub: "Full details, date and time of operations",
     todaySales: "Today's sales",
     opsCount: "operation(s)",
     totalIncome: "Total revenue",
@@ -443,6 +444,7 @@ function el(tag, cls, text) {
 }
 function pad(n) { return String(n).padStart(2, "0"); }
 function dateStr(d) { return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); }
+function timeStr(d) { return pad(d.getHours()) + ":" + pad(d.getMinutes()); }
 function today() { return dateStr(new Date()); }
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
 function money(n) { return Math.round(n || 0).toLocaleString("en-US") + " MRU"; }
@@ -478,11 +480,14 @@ function load() {
 function save() { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) {} }
 
 function recordOp(typeKey, details, amountText) {
+  const now = new Date();
   db.operations.unshift({
     id: uid(),
     typeKey,
-    details,
-    amountText: amountText || ""
+    details: details || "",
+    amountText: amountText || "",
+    date: dateStr(now),
+    time: timeStr(now)
   });
 }
 
@@ -538,7 +543,6 @@ function sectionTitle(text, link) {
   return h;
 }
 
-/* عرض المبيعات بدون تاريخ أو وقت أو سنة */
 function salesList(list) {
   const c = el("div", "card list");
   if (!list.length) { c.appendChild(el("div", "empty", tr("noSalesYet"))); return c; }
@@ -550,6 +554,8 @@ function salesList(list) {
     const m = el("div", "meta");
     m.appendChild(el("div", "name", s.customer));
     m.appendChild(el("div", "sub2", s.items.map(i => i.name + " ×" + i.qty).join("، ")));
+    const dt = [s.date, s.time].filter(Boolean).join(" · ");
+    if (dt) m.appendChild(el("div", "op-meta-line", dt));
     r.appendChild(m);
     const right = el("div");
     right.style.textAlign = "left";
@@ -562,7 +568,7 @@ function salesList(list) {
   return c;
 }
 
-/* عرض العمليات الجديدة فقط بدون تاريخ أو وقت أو سنة */
+/* عرض العمليات مع كامل التفاصيل والتاريخ والوقت والسنة أسفلها مباشرة */
 function operationsList(list) {
   const c = el("div", "card list");
   if (!list.length) { c.appendChild(el("div", "empty", tr("noOpsYet"))); return c; }
@@ -574,6 +580,8 @@ function operationsList(list) {
     const m = el("div", "meta");
     m.appendChild(el("div", "name", tr(op.typeKey)));
     if (op.details) m.appendChild(el("div", "sub2", op.details));
+    const dt = [op.date, op.time].filter(Boolean).join(" · ");
+    if (dt) m.appendChild(el("div", "op-meta-line", dt));
     r.appendChild(m);
     if (op.amountText) {
       const right = el("div");
@@ -915,18 +923,20 @@ function openSale() {
     if (v.pay === "credit") paid = 0;
     if (v.pay === "partial") paid = Math.min(Math.max(parseFloat(v.paid) || 0, 0), total);
     p.stock -= qty;
+    const now = new Date();
     const customerName = v.customer.trim() || "زبون عام";
     db.sales.unshift({
       id: uid(),
-      date: today(),
-      time: "",
+      date: dateStr(now),
+      time: timeStr(now),
       customer: customerName,
       items: [{ pid: p.id, name: p.name, qty, price }],
       total,
       paid
     });
     const opType = v.pay === "credit" ? "opDebt" : (v.pay === "partial" ? "opPartial" : "opSale");
-    recordOp(opType, customerName + " · " + p.name + " ×" + qty, money(total));
+    const extraPay = v.pay === "partial" ? " · مدفوع " + money(paid) : "";
+    recordOp(opType, customerName + " · " + p.name + " ×" + qty + extraPay, money(total));
     toast("تم تسجيل البيع ✓");
     return null;
   }, v => {
@@ -983,7 +993,8 @@ function openRestock(p) {
     const nb = parseFloat(v.buy);
     if (nb > 0) p.buy = Math.round((p.buy * p.stock + nb * q) / (p.stock + q));
     p.stock += q;
-    recordOp("opRestock", p.name + " +" + q + " " + p.unit, money((nb > 0 ? nb : p.buy) * q));
+    const unitCost = nb > 0 ? nb : p.buy;
+    recordOp("opRestock", p.name + " +" + q + " " + p.unit + " · الإجمالي في المخزون " + p.stock, money(unitCost * q));
     toast("تم تزويد المخزون ✓");
     return null;
   });
@@ -1014,7 +1025,7 @@ function openPayDebt(c) {
       s.paid += pay;
       amt -= pay;
     }
-    recordOp("opPayDebt", c.name, money(settledAmt));
+    recordOp("opPayDebt", c.name + " · تسديد دفعة", money(settledAmt));
     toast("تم تسجيل الدفعة ✓");
     return null;
   });
