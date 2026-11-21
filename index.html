@@ -1,1103 +1,653 @@
 <!DOCTYPE html>
-<html lang="fr" dir="ltr">
+<html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DEPOT — Gestion des matériaux</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --blue: #2563eb;
-            --blue-dark: #1d4ed8;
-            --blue-soft: #eff6ff;
-            --green: #10b981;
-            --green-soft: #ecfdf5;
-            --amber: #d97706;
-            --amber-soft: #fffbeb;
-            --red: #dc2626;
-            --red-soft: #fef2f2;
-            --bg-white: #ffffff;
-            --bg-page: #f4f6f9;
-            --text-dark: #0f172a;
-            --text-muted: #64748b;
-            --border: #e2e8f0;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        html, body {
-            width: 100%;
-            min-height: 100vh;
-            background-color: var(--bg-page);
-            color: var(--text-dark);
-            font-family: 'Inter', 'Cairo', sans-serif;
-            overflow-x: hidden;
-        }
-
-        /* ================= الواجهة الأولى: بيضاء واسعة بالكامل ================= */
-        #login-view {
-            width: 100%;
-            min-height: 100vh;
-            background-color: var(--bg-white);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            padding: 28px 22px;
-        }
-
-        .login-inner {
-            width: 100%;
-            max-width: 440px;
-            margin: 0 auto;
-        }
-
-        .login-brand {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 34px;
-        }
-
-        .brand-logo-box {
-            width: 46px;
-            height: 46px;
-            border-radius: 12px;
-            background: var(--blue);
-            color: #ffffff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 22px;
-            font-weight: 800;
-            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.22);
-        }
-
-        .brand-text h3 {
-            font-size: 18px;
-            font-weight: 800;
-            color: var(--text-dark);
-            letter-spacing: 0.3px;
-        }
-
-        .brand-text span {
-            font-size: 12px;
-            color: var(--text-muted);
-        }
-
-        .login-icon-box {
-            width: 54px;
-            height: 54px;
-            border-radius: 14px;
-            background: var(--blue-soft);
-            color: var(--blue);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            margin-bottom: 18px;
-        }
-
-        .login-title {
-            font-size: 26px;
-            font-weight: 800;
-            color: var(--text-dark);
-            margin-bottom: 6px;
-        }
-
-        .login-sub {
-            font-size: 14px;
-            color: var(--text-muted);
-            margin-bottom: 28px;
-            line-height: 1.5;
-        }
-
-        .field-group {
-            margin-bottom: 20px;
-        }
-
-        .field-label {
-            display: block;
-            font-size: 13px;
-            font-weight: 700;
-            color: var(--text-dark);
-            margin-bottom: 8px;
-        }
-
-        .input-box {
-            position: relative;
-        }
-
-        .white-input {
-            width: 100%;
-            padding: 15px 16px;
-            font-size: 15px;
-            font-family: 'Inter', sans-serif;
-            color: var(--text-dark);
-            background-color: #f8fafc;
-            border: 1.5px solid var(--border);
-            border-radius: 12px;
-            outline: none;
-            transition: all 0.2s ease;
-        }
-
-        .white-input:focus {
-            background-color: #ffffff;
-            border-color: var(--blue);
-            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
-        }
-
-        .btn-toggle-eye {
-            position: absolute;
-            right: 14px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            font-size: 13px;
-            font-weight: 700;
-            cursor: pointer;
-            padding: 4px;
-        }
-
-        .login-error {
-            display: none;
-            background-color: var(--red-soft);
-            color: var(--red);
-            border: 1px solid #fecaca;
-            border-radius: 12px;
-            padding: 12px 14px;
-            font-size: 13px;
-            font-weight: 700;
-            margin-bottom: 18px;
-        }
-
-        .btn-primary-full {
-            width: 100%;
-            padding: 16px;
-            background-color: var(--blue);
-            color: #ffffff;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.25);
-            transition: background 0.2s ease, transform 0.1s ease;
-        }
-
-        .btn-primary-full:hover {
-            background-color: var(--blue-dark);
-        }
-
-        .btn-primary-full:active {
-            transform: scale(0.99);
-        }
-
-        /* ================= الواجهة الثانية: مستوحاة من صور DEPOT ================= */
-        #dashboard-view {
-            display: none;
-            width: 100%;
-            min-height: 100vh;
-            background-color: var(--bg-page);
-            padding-bottom: 40px;
-        }
-
-        .app-header {
-            background-color: var(--bg-white);
-            border-bottom: 1px solid var(--border);
-            padding: 14px 18px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            position: sticky;
-            top: 0;
-            z-index: 40;
-        }
-
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .header-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
-            background-color: var(--blue);
-            color: #ffffff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 19px;
-        }
-
-        .header-titles h1 {
-            font-size: 16px;
-            font-weight: 800;
-            color: var(--text-dark);
-            line-height: 1.2;
-        }
-
-        .header-titles p {
-            font-size: 12px;
-            color: var(--text-muted);
-        }
-
-        .header-actions {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .icon-btn {
-            background: #f8fafc;
-            border: 1px solid var(--border);
-            color: var(--text-dark);
-            border-radius: 10px;
-            padding: 8px 11px;
-            font-size: 12px;
-            font-weight: 700;
-            font-family: 'Cairo', 'Inter', sans-serif;
-            cursor: pointer;
-        }
-
-        .page-wrap {
-            width: 100%;
-            max-width: 760px;
-            margin: 0 auto;
-            padding: 18px 16px;
-        }
-
-        .page-heading {
-            font-size: 24px;
-            font-weight: 800;
-            color: var(--text-dark);
-            margin-bottom: 4px;
-        }
-
-        .page-sub {
-            font-size: 13px;
-            color: var(--text-muted);
-            margin-bottom: 16px;
-        }
-
-        .btn-new-sale {
-            width: 100%;
-            padding: 15px;
-            background-color: var(--blue);
-            color: #ffffff;
-            border: none;
-            border-radius: 12px;
-            font-size: 15px;
-            font-weight: 700;
-            font-family: 'Cairo', 'Inter', sans-serif;
-            cursor: pointer;
-            margin-bottom: 18px;
-            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.2);
-        }
-
-        .kpi-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-
-        .kpi-card {
-            background-color: var(--bg-white);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 16px;
-            box-shadow: 0 2px 6px rgba(15, 23, 42, 0.03);
-        }
-
-        .kpi-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 10px;
-        }
-
-        .kpi-label {
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text-muted);
-            line-height: 1.3;
-        }
-
-        .kpi-badge {
-            width: 34px;
-            height: 34px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            flex-shrink: 0;
-        }
-
-        .kpi-main {
-            font-size: 20px;
-            font-weight: 800;
-            color: var(--text-dark);
-            margin-bottom: 4px;
-        }
-
-        .kpi-sub {
-            font-size: 11.5px;
-            color: var(--text-muted);
-            line-height: 1.4;
-        }
-
-        .section-label {
-            font-size: 15px;
-            font-weight: 800;
-            color: var(--text-dark);
-            margin-bottom: 12px;
-            font-family: 'Cairo', 'Inter', sans-serif;
-        }
-
-        .quick-card {
-            background-color: var(--bg-white);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: 15px 16px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 10px;
-            cursor: pointer;
-            transition: border-color 0.2s;
-        }
-
-        .quick-card:hover {
-            border-color: var(--blue);
-        }
-
-        .quick-left {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-
-        .quick-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-        }
-
-        .quick-title {
-            font-size: 14px;
-            font-weight: 700;
-            color: var(--text-dark);
-        }
-
-        .panel-card {
-            background-color: var(--bg-white);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 18px;
-            margin-bottom: 16px;
-        }
-
-        .panel-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 14px;
-        }
-
-        .panel-title {
-            font-size: 16px;
-            font-weight: 800;
-            color: var(--text-dark);
-            font-family: 'Cairo', 'Inter', sans-serif;
-        }
-
-        .panel-sub {
-            font-size: 12px;
-            color: var(--text-muted);
-        }
-
-        .form-row-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-
-        .ctrl-input, .ctrl-select {
-            width: 100%;
-            padding: 12px 13px;
-            border: 1.5px solid var(--border);
-            border-radius: 10px;
-            background-color: #f8fafc;
-            font-size: 14px;
-            font-family: 'Cairo', 'Inter', sans-serif;
-            color: var(--text-dark);
-            margin-bottom: 12px;
-            outline: none;
-        }
-
-        .ctrl-input:focus, .ctrl-select:focus {
-            background-color: #ffffff;
-            border-color: var(--blue);
-        }
-
-        .btn-save {
-            width: 100%;
-            padding: 13px;
-            background-color: var(--blue);
-            color: #ffffff;
-            border: none;
-            border-radius: 10px;
-            font-size: 14px;
-            font-weight: 700;
-            font-family: 'Cairo', 'Inter', sans-serif;
-            cursor: pointer;
-        }
-
-        .btn-save.green {
-            background-color: var(--green);
-        }
-
-        .list-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 13px 0;
-            border-bottom: 1px solid #f1f5f9;
-        }
-
-        .list-row:last-child {
-            border-bottom: none;
-        }
-
-        .row-name {
-            font-size: 14px;
-            font-weight: 700;
-            color: var(--text-dark);
-        }
-
-        .row-meta {
-            font-size: 12px;
-            color: var(--text-muted);
-            margin-top: 2px;
-        }
-
-        .row-right {
-            text-align: right;
-        }
-
-        .row-amount {
-            font-size: 14px;
-            font-weight: 800;
-            color: var(--text-dark);
-        }
-
-        .row-profit {
-            font-size: 12px;
-            font-weight: 700;
-            color: var(--green);
-        }
-
-        .pill {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 999px;
-            font-size: 11.5px;
-            font-weight: 700;
-        }
-
-        .pill-ok {
-            background: var(--green-soft);
-            color: #047857;
-        }
-
-        .pill-warn {
-            background: var(--amber-soft);
-            color: var(--amber);
-        }
-
-        .pill-out {
-            background: var(--red-soft);
-            color: var(--red);
-        }
-
-        .sub-view {
-            display: none;
-        }
-
-        .sub-view.active {
-            display: block;
-        }
-
-        .btn-back {
-            background: #ffffff;
-            border: 1px solid var(--border);
-            color: var(--text-dark);
-            border-radius: 10px;
-            padding: 8px 13px;
-            font-size: 13px;
-            font-weight: 700;
-            font-family: 'Cairo', 'Inter', sans-serif;
-            cursor: pointer;
-            margin-bottom: 14px;
-            display: inline-block;
-        }
-
-        .btn-mini-del {
-            background: var(--red-soft);
-            color: var(--red);
-            border: none;
-            border-radius: 6px;
-            padding: 3px 8px;
-            font-size: 11px;
-            font-weight: 700;
-            cursor: pointer;
-            margin-top: 4px;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>مخزن مواد البناء</title>
+<style>
+:root{--primary:#1d5cff;--primary-soft:#e8efff;--orange:#e8571f;--orange-soft:#fff1ea;--green:#15a05a;--green-soft:#e7f8ef;--purple:#7c3aed;--purple-soft:#f3edff;--warn:#d97706;--warn-soft:#fff6e0;--danger:#dc2626;--danger-soft:#fdeaea;--bg:#f4f6fb;--card:#ffffff;--text:#1a2233;--muted:#6b7689;--line:#e6eaf2;--shadow:0 6px 20px rgba(20,40,90,.07)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1424;--card:#171f33;--text:#e7ecf7;--muted:#97a3bb;--line:#26314a;--primary-soft:#1d2b52;--orange-soft:#3a2219;--green-soft:#133227;--purple-soft:#2a2046;--warn-soft:#3a2d12;--danger-soft:#3a1717;--shadow:none}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:"Segoe UI",Tahoma,Arial,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:calc(92px + env(safe-area-inset-bottom,0px))}
+
+/* واجهة تسجيل الدخول الأولى */
+#loginScreen{position:fixed;inset:0;background:#ffffff;z-index:100;display:flex;flex-direction:column;justify-content:center;padding:24px;overflow:auto}
+#loginScreen .login-box{width:100%;max-width:440px;margin:0 auto}
+#loginScreen .login-logo{width:56px;height:56px;border-radius:16px;background:var(--primary);color:#fff;display:grid;place-items:center;font-size:26px;margin-bottom:18px;box-shadow:0 8px 18px rgba(29,92,255,.25)}
+#loginScreen h2{margin:0 0 6px;font-size:1.6rem;color:#1a2233}
+#loginScreen p{margin:0 0 24px;color:#6b7689;font-size:.95rem}
+#loginScreen .l-field{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+#loginScreen .l-field label{font-size:.9rem;font-weight:600;color:#1a2233}
+#loginScreen .l-field input{padding:15px;border-radius:14px;border:1.5px solid #e6eaf2;background:#f8fafc;color:#1a2233;font-size:1rem;font-family:inherit;width:100%;direction:ltr;text-align:left;outline:none}
+#loginScreen .l-field input:focus{border-color:var(--primary);background:#ffffff}
+#loginError{display:none;background:#fdeaea;color:#dc2626;padding:12px 14px;border-radius:12px;font-size:.9rem;font-weight:600;margin-bottom:16px;text-align:center}
+
+#app{max-width:560px;margin:0 auto;padding:0 16px}
+header{position:sticky;top:0;z-index:5;background:var(--bg);display:flex;align-items:center;gap:12px;padding:calc(14px + env(safe-area-inset-top,0px)) 0 12px}
+.logo{width:48px;height:48px;border-radius:14px;background:var(--primary);display:grid;place-items:center;color:#fff;font-size:24px;box-shadow:0 8px 18px rgba(29,92,255,.3)}
+.brand b{display:block;font-size:1.15rem}
+.brand span{color:var(--muted);font-size:.85rem}
+.menu-btn{margin-inline-start:auto;width:44px;height:44px;border-radius:14px;border:1px solid var(--line);background:var(--card);font-size:1.2rem;cursor:pointer;color:var(--text)}
+h1{font-size:1.6rem;margin:10px 0 4px}
+.sub{color:var(--muted);margin:0 0 16px}
+.btn{border:0;border-radius:16px;padding:14px 18px;font-size:1rem;font-weight:600;cursor:pointer;background:var(--primary);color:#fff;font-family:inherit}
+.btn.block{width:100%}
+.btn.ghost{background:var(--card);color:var(--text);border:1px solid var(--line)}
+.btn.sm{padding:8px 12px;font-size:.85rem;border-radius:12px}
+.card{background:var(--card);border-radius:22px;box-shadow:var(--shadow);border:1px solid var(--line)}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:18px 0}
+.stat{padding:16px;border-radius:22px;background:var(--card);box-shadow:var(--shadow);border:1px solid var(--line)}
+.stat .top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;color:var(--muted);font-size:.9rem}
+.ico{width:40px;height:40px;border-radius:14px;display:grid;place-items:center;font-size:1.15rem;flex:none}
+.stat .val{font-size:1.2rem;font-weight:700;margin-top:14px;direction:ltr;text-align:right}
+.stat .hint{color:var(--muted);font-size:.8rem;margin-top:4px}
+.section-title{display:flex;justify-content:space-between;align-items:center;margin:22px 0 10px}
+.section-title h2{font-size:1.1rem;margin:0}
+.link{color:var(--orange);background:none;border:0;font-weight:600;cursor:pointer;font-family:inherit;font-size:.9rem}
+.quick{display:flex;flex-direction:column;gap:10px}
+.quick button{display:flex;align-items:center;gap:14px;padding:14px;border-radius:20px;background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow);cursor:pointer;color:var(--text);font-family:inherit;font-size:1rem;text-align:start}
+.quick .arrow{margin-inline-start:auto;color:var(--muted)}
+.list{overflow:hidden}
+.row{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+.row .meta{flex:1;min-width:0}
+.row .name{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .sub2{color:var(--muted);font-size:.85rem;margin-top:2px;overflow:hidden;text-overflow:ellipsis}
+.amount{font-weight:700;direction:ltr;white-space:nowrap}
+.badge{font-size:.78rem;padding:4px 10px;border-radius:99px;white-space:nowrap;font-weight:600;display:inline-block;margin-top:4px}
+.b-ok{background:var(--green-soft);color:var(--green)}
+.b-warn{background:var(--warn-soft);color:var(--warn)}
+.b-out{background:var(--danger-soft);color:var(--danger)}
+.b-credit{background:var(--orange-soft);color:var(--orange)}
+.actions{display:flex;gap:8px;flex-wrap:wrap;padding:0 16px 14px;margin-top:-6px}
+.empty{padding:24px;text-align:center;color:var(--muted)}
+nav{position:fixed;bottom:0;inset-inline:0;max-width:560px;margin:0 auto;background:var(--card);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);padding:8px 8px calc(8px + env(safe-area-inset-bottom,0px));z-index:6}
+nav button{background:none;border:0;color:var(--muted);font-family:inherit;font-size:.78rem;display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px;cursor:pointer;border-radius:14px}
+nav button .n-ico{font-size:1.2rem}
+nav button.active{color:var(--primary);background:var(--primary-soft);font-weight:600}
+.overlay{position:fixed;inset:0;background:rgba(10,16,30,.45);display:none;align-items:flex-end;justify-content:center;z-index:20}
+.overlay.show{display:flex}
+.sheet{background:var(--card);width:100%;max-width:560px;border-radius:26px 26px 0 0;padding:18px 18px calc(18px + env(safe-area-inset-bottom,0px));max-height:90vh;overflow:auto}
+.grip{width:44px;height:5px;border-radius:9px;background:var(--line);margin:0 auto 12px}
+.sheet h3{margin:0 0 14px;font-size:1.15rem}
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+.field label{font-size:.88rem;color:var(--muted)}
+.field input,.field select{padding:13px;border-radius:14px;border:1px solid var(--line);background:var(--bg);color:var(--text);font-size:1rem;font-family:inherit;width:100%}
+.hint2{color:var(--muted);font-size:.8rem}
+.total-box{background:var(--primary-soft);color:var(--primary);border-radius:16px;padding:12px;text-align:center;font-weight:700;margin-bottom:12px;direction:ltr;display:none}
+.form-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
+#toast{position:fixed;top:18px;left:50%;transform:translateX(-50%) translateY(-120px);background:#111827;color:#fff;padding:12px 18px;border-radius:14px;transition:transform .3s;z-index:30;max-width:90%;text-align:center}
+#toast.show{transform:translateX(-50%) translateY(0)}
+</style>
 </head>
 <body>
 
-    <!-- ================= الواجهة الأولى: بيضاء واسعة بالكامل ================= -->
-    <section id="login-view">
-        <div class="login-inner">
-            <div class="login-brand">
-                <div class="brand-logo-box">🏠</div>
-                <div class="brand-text">
-                    <h3>DEPOT</h3>
-                    <span>Gestion des matériaux</span>
-                </div>
-            </div>
+<!-- الواجهة الأولى: تسجيل الدخول -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">🔒</div>
+    <h2>تسجيل الدخول</h2>
+    <p>أدخل البريد الإلكتروني وكلمة السر للمتابعة</p>
+    <div id="loginError">البريد الإلكتروني غير صحيح</div>
+    <form id="loginForm" novalidate>
+      <div class="l-field">
+        <label for="loginEmail">البريد الإلكتروني (Email)</label>
+        <input type="email" id="loginEmail" placeholder="example@gmail.com" autocomplete="email" required>
+      </div>
+      <div class="l-field">
+        <label for="loginPass">كلمة السر (Mot de passe)</label>
+        <input type="password" id="loginPass" placeholder="••••••••••" autocomplete="current-password" required>
+      </div>
+      <button type="submit" class="btn block">Se connecter</button>
+    </form>
+  </div>
+</div>
 
-            <div class="login-icon-box">🔒</div>
-            <h2 class="login-title">Connexion</h2>
-            <p class="login-sub">Veuillez saisir vos identifiants pour continuer</p>
+<div id="app">
+  <header>
+    <div class="logo">🧱</div>
+    <div class="brand"><b>مخزن مواد البناء</b><span>إدارة المخزون والمبيعات</span></div>
+    <button class="menu-btn" id="menuBtn" title="إعادة ضبط البيانات">☰</button>
+  </header>
+  <main id="main"></main>
+</div>
+<nav id="nav"></nav>
+<div class="overlay" id="overlay"><div class="sheet" id="sheet"></div></div>
+<div id="toast"></div>
 
-            <div id="login-error" class="login-error">
-                Email ou mot de passe incorrect.
-            </div>
+<script>
+/* منطق الواجهة الأولى */
+const ALLOWED_EMAIL = "ab.med3205@gmail.com";
+const loginScreen = document.getElementById("loginScreen");
+const loginForm = document.getElementById("loginForm");
+const loginError = document.getElementById("loginError");
 
-            <form id="login-form" novalidate>
-                <div class="field-group">
-                    <label class="field-label" for="login-email">Email</label>
-                    <input type="email" id="login-email" class="white-input" placeholder="exemple@gmail.com" autocomplete="email" required>
-                </div>
+if (sessionStorage.getItem("depot_logged_in") === "1") {
+  loginScreen.style.display = "none";
+}
 
-                <div class="field-group">
-                    <label class="field-label" for="login-password">Mot de passe</label>
-                    <div class="input-box">
-                        <input type="password" id="login-password" class="white-input" placeholder="••••••••••" autocomplete="current-password" required>
-                        <button type="button" class="btn-toggle-eye" onclick="togglePass()">Afficher</button>
-                    </div>
-                </div>
+loginForm.addEventListener("submit", function(e) {
+  e.preventDefault();
+  const emailVal = document.getElementById("loginEmail").value.trim().toLowerCase();
+  const passVal = document.getElementById("loginPass").value.trim();
+  if (emailVal === ALLOWED_EMAIL && passVal.length > 0) {
+    loginError.style.display = "none";
+    sessionStorage.setItem("depot_logged_in", "1");
+    loginScreen.style.display = "none";
+  } else {
+    loginError.style.display = "block";
+  }
+});
 
-                <button type="submit" class="btn-primary-full">Se connecter</button>
-            </form>
-        </div>
-    </section>
+const KEY = "depot-app-v1";
+const $ = id => document.getElementById(id);
 
-    <!-- ================= الواجهة الثانية: مستوحاة من صور DEPOT ================= -->
-    <section id="dashboard-view">
-        <header class="app-header">
-            <div class="header-left">
-                <div class="header-icon">🏠</div>
-                <div class="header-titles">
-                    <h1>DEPOT</h1>
-                    <p>Gestion des matériaux</p>
-                </div>
-            </div>
-            <div class="header-actions">
-                <button class="icon-btn" onclick="openSubView('home-sub')">Accueil</button>
-                <button class="icon-btn" onclick="logoutApp()">☰</button>
-            </div>
-        </header>
+function el(tag, cls, text) {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text !== undefined) e.textContent = text;
+  return e;
+}
+function pad(n) { return String(n).padStart(2, "0"); }
+function dateStr(d) { return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); }
+function today() { return dateStr(new Date()); }
+function daysAgo(n) { const d = new Date(); d.setDate(d.getDate() + n); return dateStr(d); }
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+function money(n) { return Math.round(n || 0).toLocaleString("en-US") + " MRU"; }
+function num(n) { return Math.round(n || 0).toLocaleString("en-US"); }
+function sum(arr, f) { return arr.reduce((a, x) => a + (f(x) || 0), 0); }
+function toast(msg) {
+  const t = $("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(t._h);
+  t._h = setTimeout(() => t.classList.remove("show"), 2200);
+}
 
-        <div class="page-wrap">
-            <div id="home-sub" class="sub-view active">
-                <h2 class="page-heading">Tableau de bord</h2>
-                <p class="page-sub">Voici le résumé de l'activité de votre dépôt.</p>
+function seed() {
+  return {
+    products: [
+      { id: "p1", name: "الأسمنت", unit: "كيس", buy: 800, sell: 950, stock: 120, min: 20 },
+      { id: "p2", name: "الحديد", unit: "قضيب 12م", buy: 1200, sell: 1400, stock: 40, min: 10 },
+      { id: "p3", name: "الجص (المطل)", unit: "كيس", buy: 500, sell: 650, stock: 60, min: 15 },
+      { id: "p4", name: "السيراميك", unit: "م²", buy: 900, sell: 1200, stock: 80, min: 20 },
+      { id: "p5", name: "أنابيب رقم 25", unit: "قطعة", buy: 350, sell: 480, stock: 4, min: 10 },
+      { id: "p6", name: "أنابيب رقم 28", unit: "قطعة", buy: 420, sell: 560, stock: 3, min: 10 }
+    ],
+    sales: [
+      { id: uid(), date: today(), time: "09:57", customer: "زبون تجريبي", items: [{ pid: "p2", name: "الحديد", qty: 1, price: 1400 }], total: 1400, paid: 1400 },
+      { id: uid(), date: daysAgo(-1), time: "17:00", customer: "زبون آجل", items: [{ pid: "p1", name: "الأسمنت", qty: 20, price: 950 }], total: 19000, paid: 0 }
+    ]
+  };
+}
+function load() {
+  try {
+    const r = localStorage.getItem(KEY);
+    if (r) return JSON.parse(r);
+  } catch (e) {}
+  return seed();
+}
+function save() { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) {} }
 
-                <button class="btn-new-sale" onclick="openSubView('sale-sub')">+ Nouvelle vente</button>
+let db = load();
+let view = "home";
+save();
 
-                <div class="kpi-grid">
-                    <div class="kpi-card">
-                        <div class="kpi-top">
-                            <span class="kpi-label">Ventes aujourd'hui</span>
-                            <span class="kpi-badge" style="background:#fff7ed; color:#ea580c;">🧾</span>
-                        </div>
-                        <div class="kpi-main" id="kpi-today-count">0</div>
-                        <div class="kpi-sub" id="kpi-today-amount">0 MRU</div>
-                    </div>
+function stats() {
+  const t = today();
+  const todaySales = db.sales.filter(s => s.date === t);
+  return {
+    todayCount: todaySales.length,
+    todayAmt: sum(todaySales, s => s.total),
+    revenue: sum(db.sales, s => s.total),
+    salesCount: db.sales.length,
+    refs: db.products.length,
+    units: sum(db.products, p => p.stock),
+    value: sum(db.products, p => p.stock * p.buy),
+    out: db.products.filter(p => p.stock <= 0).length,
+    debt: sum(db.sales, s => s.total - s.paid)
+  };
+}
 
-                    <div class="kpi-card">
-                        <div class="kpi-top">
-                            <span class="kpi-label">Bénéfice / Chiffre</span>
-                            <span class="kpi-badge" style="background:#ecfdf5; color:#059669;">💼</span>
-                        </div>
-                        <div class="kpi-main" id="kpi-today-profit">0 MRU</div>
-                        <div class="kpi-sub" id="kpi-sales-total-label">مبيعات اليوم: 0 MRU</div>
-                    </div>
+function stockBadge(p) {
+  if (p.stock <= 0) return el("span", "badge b-out", "نفد");
+  if (p.stock <= p.min) return el("span", "badge b-warn", p.stock + " متبقي");
+  return el("span", "badge b-ok", p.stock + " متوفر");
+}
 
-                    <div class="kpi-card">
-                        <div class="kpi-top">
-                            <span class="kpi-label">Références en stock</span>
-                            <span class="kpi-badge" style="background:#eff6ff; color:#2563eb;">📦</span>
-                        </div>
-                        <div class="kpi-main" id="kpi-ref-count">0</div>
-                        <div class="kpi-sub" id="kpi-stock-breakdown">-</div>
-                    </div>
+function statCard(icon, bg, label, value, hint) {
+  const c = el("div", "stat");
+  const top = el("div", "top");
+  top.appendChild(el("span", "", label));
+  const ic = el("div", "ico", icon);
+  ic.style.background = bg;
+  top.appendChild(ic);
+  c.appendChild(top);
+  c.appendChild(el("div", "val", value));
+  if (hint) c.appendChild(el("div", "hint", hint));
+  return c;
+}
 
-                    <div class="kpi-card">
-                        <div class="kpi-top">
-                            <span class="kpi-label">Valeur du stock</span>
-                            <span class="kpi-badge" style="background:#f5f3ff; color:#7c3aed;">🧱</span>
-                        </div>
-                        <div class="kpi-main" id="kpi-stock-value">0 MRU</div>
-                        <div class="kpi-sub" id="kpi-depleted-label">0 référence(s) épuisée(s)</div>
-                    </div>
-                </div>
+function sectionTitle(text, link) {
+  const h = el("div", "section-title");
+  h.appendChild(el("h2", "", text));
+  if (link) {
+    const b = el("button", "link", link[0]);
+    b.onclick = link[1];
+    h.appendChild(b);
+  }
+  return h;
+}
 
-                <div class="section-label">Accès rapides</div>
+function salesList(list) {
+  const c = el("div", "card list");
+  if (!list.length) { c.appendChild(el("div", "empty", "لا توجد مبيعات بعد")); return c; }
+  list.forEach(s => {
+    const r = el("div", "row");
+    const ic = el("div", "ico", "🧾");
+    ic.style.background = "var(--orange-soft)";
+    r.appendChild(ic);
+    const m = el("div", "meta");
+    m.appendChild(el("div", "name", s.customer));
+    m.appendChild(el("div", "sub2", s.date + " · " + s.time + " · " + s.items.map(i => i.name + " ×" + i.qty).join("، ")));
+    r.appendChild(m);
+    const right = el("div");
+    right.style.textAlign = "left";
+    right.appendChild(el("div", "amount", money(s.total)));
+    const rem = s.total - s.paid;
+    if (rem > 0) right.appendChild(el("span", "badge b-credit", "باقي " + num(rem)));
+    r.appendChild(right);
+    c.appendChild(r);
+  });
+  return c;
+}
 
-                <div class="quick-card" onclick="openSubView('sale-sub')">
-                    <div class="quick-left">
-                        <div class="quick-icon" style="background:#fff7ed; color:#ea580c;">🛍️</div>
-                        <div class="quick-title">Nouvelle vente</div>
-                    </div>
-                    <span style="color:#94a3b8;">→</span>
-                </div>
+function buildHome() {
+  const s = stats();
+  const wrap = el("div");
+  wrap.appendChild(el("h1", "", "لوحة التحكم"));
+  wrap.appendChild(el("p", "sub", "ملخص نشاط مخزنك"));
+  const big = el("button", "btn block", "+ بيع جديد");
+  big.onclick = () => openSale();
+  wrap.appendChild(big);
 
-                <div class="quick-card" onclick="openSubView('stock-sub')">
-                    <div class="quick-left">
-                        <div class="quick-icon" style="background:#fefce8; color:#ca8a04;">🧱</div>
-                        <div class="quick-title">Gérer les matériaux (الأسمنت، الحديد، المطل، السك، نشاشات، أنابيب 25 و28)</div>
-                    </div>
-                    <span style="color:#94a3b8;">→</span>
-                </div>
+  const grid = el("div", "stats");
+  grid.appendChild(statCard("🧾", "var(--orange-soft)", "مبيعات اليوم", money(s.todayAmt), s.todayCount + " عملية"));
+  grid.appendChild(statCard("💰", "var(--green-soft)", "إجمالي الدخل", money(s.revenue), s.salesCount + " عملية"));
+  grid.appendChild(statCard("📦", "var(--primary-soft)", "الأصناف", num(s.refs), num(s.units) + " وحدة في المخزون"));
+  grid.appendChild(statCard("🧱", "var(--purple-soft)", "قيمة المخزون", money(s.value), s.out ? s.out + " صنف نفد" : "بسعر الشراء"));
+  wrap.appendChild(grid);
 
-                <div class="quick-card" onclick="openSubView('sales-sub')">
-                    <div class="quick-left">
-                        <div class="quick-icon" style="background:#eff6ff; color:#2563eb;">📋</div>
-                        <div class="quick-title">Ventes récentes & Bénéfices</div>
-                    </div>
-                    <span style="color:#94a3b8;">→</span>
-                </div>
+  if (s.debt > 0) {
+    const d = el("div", "card");
+    d.style.cssText = "padding:14px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px";
+    d.appendChild(el("span", "", "ديون الزبائن غير المسددة"));
+    const a = el("span", "amount", money(s.debt));
+    a.style.color = "var(--orange)";
+    d.appendChild(a);
+    wrap.appendChild(d);
+  }
 
-                <div class="panel-card" style="margin-top:16px;">
-                    <div class="panel-header">
-                        <div>
-                            <div class="panel-title">Ventes récentes</div>
-                            <div class="panel-sub">Les dernières opérations enregistrées</div>
-                        </div>
-                        <span style="font-size:12px; font-weight:700; color:var(--blue); cursor:pointer;" onclick="openSubView('sales-sub')">Tout voir →</span>
-                    </div>
-                    <div id="recent-sales-box"></div>
-                </div>
+  wrap.appendChild(sectionTitle("وصول سريع"));
+  const q = el("div", "quick");
+  [
+    ["🧾", "بيع جديد", "var(--orange-soft)", () => openSale()],
+    ["📦", "إدارة المخزون", "var(--primary-soft)", () => go("stock")],
+    ["👥", "الزبائن والديون", "var(--green-soft)", () => go("customers")]
+  ].forEach(([i, t, bg, fn]) => {
+    const b = el("button");
+    const ic = el("span", "ico", i);
+    ic.style.background = bg;
+    b.appendChild(ic);
+    b.appendChild(el("span", "", t));
+    b.appendChild(el("span", "arrow", "←"));
+    b.onclick = fn;
+    q.appendChild(b);
+  });
+  wrap.appendChild(q);
 
-                <div class="panel-card">
-                    <div class="panel-header">
-                        <div>
-                            <div class="panel-title">Stock à surveiller</div>
-                            <div class="panel-sub">10 unités ou moins restantes</div>
-                        </div>
-                        <span class="kpi-badge" style="background:#fefce8; color:#ca8a04;">!</span>
-                    </div>
-                    <div id="watch-stock-box"></div>
-                </div>
-            </div>
+  wrap.appendChild(sectionTitle("آخر المبيعات", ["عرض الكل", () => go("sales")]));
+  wrap.appendChild(salesList(db.sales.slice(0, 4)));
 
-            <div id="sale-sub" class="sub-view">
-                <button class="btn-back" onclick="openSubView('home-sub')">← Retour au tableau de bord</button>
-                <div class="panel-card">
-                    <div class="panel-header">
-                        <div class="panel-title">Nouvelle vente / تسجيل بيع</div>
-                    </div>
-                    <label class="field-label">المادة / Article</label>
-                    <select id="sale-article-select" class="ctrl-select" onchange="syncSalePrice()"></select>
+  wrap.appendChild(sectionTitle("مخزون يحتاج متابعة"));
+  const low = db.products.filter(p => p.stock <= p.min);
+  const lc = el("div", "card list");
+  if (!low.length) lc.appendChild(el("div", "empty", "كل الأصناف بكميات كافية ✓"));
+  low.forEach(p => {
+    const r = el("div", "row");
+    const m = el("div", "meta");
+    m.appendChild(el("div", "name", p.name));
+    m.appendChild(el("div", "sub2", p.unit + " · الحد الأدنى " + p.min));
+    r.appendChild(m);
+    r.appendChild(stockBadge(p));
+    lc.appendChild(r);
+  });
+  wrap.appendChild(lc);
+  return wrap;
+}
 
-                    <div class="form-row-2">
-                        <div>
-                            <label class="field-label">الكمية / Quantité</label>
-                            <input type="number" id="sale-qty" class="ctrl-input" placeholder="Ex: 5" step="any" min="0.01">
-                        </div>
-                        <div>
-                            <label class="field-label">سعر البيع / Prix unitaire (MRU)</label>
-                            <input type="number" id="sale-price" class="ctrl-input" placeholder="Prix" step="any" min="0">
-                        </div>
-                    </div>
+function buildStock() {
+  const wrap = el("div");
+  wrap.appendChild(el("h1", "", "المخزون"));
+  wrap.appendChild(el("p", "sub", "كل الأصناف وكمياتها وأسعارها"));
+  const add = el("button", "btn block", "+ إضافة صنف جديد");
+  add.onclick = () => openProduct(null);
+  wrap.appendChild(add);
 
-                    <input type="text" id="sale-client" class="ctrl-input" placeholder="اسم الزبون / Client (اختياري)">
+  const list = el("div", "card list");
+  list.style.marginTop = "16px";
+  if (!db.products.length) list.appendChild(el("div", "empty", "لا توجد أصناف"));
+  db.products.forEach(p => {
+    const r = el("div", "row");
+    const m = el("div", "meta");
+    m.appendChild(el("div", "name", p.name));
+    m.appendChild(el("div", "sub2", "شراء " + num(p.buy) + " · بيع " + num(p.sell) + " · " + p.unit));
+    r.appendChild(m);
+    r.appendChild(stockBadge(p));
+    list.appendChild(r);
 
-                    <button class="btn-save green" onclick="submitSale()">Valider la vente & Calculer le bénéfice</button>
-                </div>
-            </div>
+    const a = el("div", "actions");
+    const b1 = el("button", "btn ghost sm", "+ تزويد");
+    b1.onclick = () => openRestock(p);
+    const b2 = el("button", "btn ghost sm", "تعديل");
+    b2.onclick = () => openProduct(p);
+    const b3 = el("button", "btn ghost sm", "حذف");
+    b3.style.color = "var(--danger)";
+    b3.onclick = () => deleteProduct(p);
+    a.append(b1, b2, b3);
+    list.appendChild(a);
+  });
+  wrap.appendChild(list);
+  return wrap;
+}
 
-            <div id="stock-sub" class="sub-view">
-                <button class="btn-back" onclick="openSubView('home-sub')">← Retour au tableau de bord</button>
-                <div class="panel-card">
-                    <div class="panel-header">
-                        <div class="panel-title">Ajouter ou recharger un matériau / إضافة أو تزويد مادة</div>
-                    </div>
-                    <input type="text" id="add-name" class="ctrl-input" placeholder="اسم المادة (الأسمنت، الحديد، المطل، السك، نشاشات، أنابيب 25، أنابيب 28)">
-                    <div class="form-row-2">
-                        <input type="number" id="add-qty" class="ctrl-input" placeholder="الكمية / Quantité" step="any" min="0">
-                        <input type="text" id="add-unit" class="ctrl-input" placeholder="الوحدة (طن / كيس / حبة / متر)">
-                    </div>
-                    <div class="form-row-2">
-                        <input type="number" id="add-cost" class="ctrl-input" placeholder="سعر الشراء / Coût (MRU)" step="any" min="0">
-                        <input type="number" id="add-price" class="ctrl-input" placeholder="سعر البيع / Prix vente (MRU)" step="any" min="0">
-                    </div>
-                    <button class="btn-save" onclick="submitStock()">Enregistrer dans le stock</button>
-                </div>
+function buildSales() {
+  const wrap = el("div");
+  wrap.appendChild(el("h1", "", "المبيعات"));
+  wrap.appendChild(el("p", "sub", "سجل كل عمليات البيع"));
+  const b = el("button", "btn block", "+ بيع جديد");
+  b.onclick = () => openSale();
+  wrap.appendChild(b);
+  const c = el("div");
+  c.style.marginTop = "16px";
+  c.appendChild(salesList(db.sales));
+  wrap.appendChild(c);
+  return wrap;
+}
 
-                <div class="panel-card">
-                    <div class="panel-header">
-                        <div class="panel-title">Tous les matériaux en stock / كل المواد المتوفرة</div>
-                    </div>
-                    <div id="all-stock-box"></div>
-                </div>
-            </div>
+function customersMap() {
+  const map = {};
+  db.sales.forEach(s => {
+    const k = s.customer;
+    if (!map[k]) map[k] = { name: k, count: 0, total: 0, debt: 0 };
+    map[k].count++;
+    map[k].total += s.total;
+    map[k].debt += s.total - s.paid;
+  });
+  return Object.values(map).sort((a, b) => (b.debt - a.debt) || (b.total - a.total));
+}
 
-            <div id="sales-sub" class="sub-view">
-                <button class="btn-back" onclick="openSubView('home-sub')">← Retour au tableau de bord</button>
-                <div class="panel-card">
-                    <div class="panel-header">
-                        <div class="panel-title">Historique des ventes & Bénéfices</div>
-                        <button class="btn-mini-del" onclick="clearSalesLog()">Réinitialiser</button>
-                    </div>
-                    <div id="full-sales-box"></div>
-                </div>
-            </div>
-        </div>
-    </section>
+function buildCustomers() {
+  const wrap = el("div");
+  wrap.appendChild(el("h1", "", "الزبائن"));
+  wrap.appendChild(el("p", "sub", "مشترياتهم وديونهم غير المسددة"));
+  const list = el("div", "card list");
+  const cs = customersMap();
+  if (!cs.length) list.appendChild(el("div", "empty", "لا يوجد زبائن بعد"));
+  cs.forEach(c => {
+    const r = el("div", "row");
+    const ic = el("div", "ico", "👤");
+    ic.style.background = "var(--primary-soft)";
+    r.appendChild(ic);
+    const m = el("div", "meta");
+    m.appendChild(el("div", "name", c.name));
+    m.appendChild(el("div", "sub2", c.count + " عملية · إجمالي " + money(c.total)));
+    r.appendChild(m);
+    const right = el("div");
+    right.style.textAlign = "left";
+    if (c.debt > 0) {
+      right.appendChild(el("div", "amount", money(c.debt)));
+      right.appendChild(el("span", "badge b-credit", "دين"));
+    } else {
+      right.appendChild(el("span", "badge b-ok", "مسدّد"));
+    }
+    r.appendChild(right);
+    list.appendChild(r);
+    if (c.debt > 0) {
+      const a = el("div", "actions");
+      const b = el("button", "btn sm", "تسديد دفعة");
+      b.onclick = () => openPayDebt(c);
+      a.appendChild(b);
+      list.appendChild(a);
+    }
+  });
+  wrap.appendChild(list);
+  return wrap;
+}
 
-    <script>
-        const AUTH_EMAIL = "Abmed3205@gmail.com";
-        const AUTH_PASS = "36654787Ab";
+function render() {
+  const main = $("main");
+  main.innerHTML = "";
+  const builders = { home: buildHome, stock: buildStock, sales: buildSales, customers: buildCustomers };
+  main.appendChild(builders[view]());
 
-        const loginView = document.getElementById('login-view');
-        const dashboardView = document.getElementById('dashboard-view');
-        const loginForm = document.getElementById('login-form');
-        const loginError = document.getElementById('login-error');
+  const nav = $("nav");
+  nav.innerHTML = "";
+  [["home", "🏠", "الرئيسية"], ["stock", "📦", "المخزون"], ["sales", "🧾", "المبيعات"], ["customers", "👥", "الزبائن"]]
+    .forEach(([k, i, t]) => {
+      const b = el("button", view === k ? "active" : "");
+      b.appendChild(el("span", "n-ico", i));
+      b.appendChild(el("span", "", t));
+      b.onclick = () => go(k);
+      nav.appendChild(b);
+    });
+  window.scrollTo(0, 0);
+}
+function go(v) { view = v; render(); }
 
-        if (sessionStorage.getItem('depot_auth') === '1') {
-            enterDashboard();
-        }
+/* ---------- نافذة النماذج ---------- */
+function openForm(title, fields, submitText, onSubmit, onLive) {
+  const sheet = $("sheet");
+  sheet.innerHTML = "";
+  sheet.appendChild(el("div", "grip"));
+  sheet.appendChild(el("h3", "", title));
 
-        function togglePass() {
-            const inp = document.getElementById('login-password');
-            const btn = document.querySelector('.btn-toggle-eye');
-            if (inp.type === 'password') {
-                inp.type = 'text';
-                btn.textContent = 'Masquer';
-            } else {
-                inp.type = 'password';
-                btn.textContent = 'Afficher';
-            }
-        }
+  const inputs = {};
+  fields.forEach(f => {
+    const wrap = el("div", "field");
+    wrap.appendChild(el("label", "", f.label));
+    let input;
+    if (f.type === "select") {
+      input = el("select");
+      f.options.forEach(([v, l]) => {
+        const o = el("option", "", l);
+        o.value = v;
+        input.appendChild(o);
+      });
+    } else {
+      input = el("input");
+      input.type = f.type || "text";
+      if (f.type === "number") { input.inputMode = "decimal"; input.min = "0"; input.step = "any"; }
+    }
+    input.value = f.value ?? "";
+    if (f.placeholder) input.placeholder = f.placeholder;
+    inputs[f.key] = input;
+    wrap.appendChild(input);
+    if (f.hint) wrap.appendChild(el("div", "hint2", f.hint));
+    sheet.appendChild(wrap);
+  });
 
-        loginForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const em = document.getElementById('login-email').value.trim();
-            const pw = document.getElementById('login-password').value.trim();
+  const values = () => {
+    const o = {};
+    for (const k in inputs) o[k] = inputs[k].value;
+    return o;
+  };
 
-            if (em.toLowerCase() === AUTH_EMAIL.toLowerCase() && pw === AUTH_PASS) {
-                loginError.style.display = 'none';
-                sessionStorage.setItem('depot_auth', '1');
-                enterDashboard();
-            } else {
-                loginError.style.display = 'block';
-            }
-        });
+  const tot = el("div", "total-box");
+  sheet.appendChild(tot);
+  if (onLive) {
+    const upd = () => {
+      const t = onLive(values());
+      tot.textContent = t || "";
+      tot.style.display = t ? "block" : "none";
+    };
+    Object.values(inputs).forEach(i => {
+      i.addEventListener("input", upd);
+      i.addEventListener("change", upd);
+    });
+    upd();
+  }
 
-        function enterDashboard() {
-            loginView.style.display = 'none';
-            dashboardView.style.display = 'block';
-            renderDashboard();
-        }
+  const actions = el("div", "form-actions");
+  const cancel = el("button", "btn ghost", "إلغاء");
+  cancel.onclick = closeModal;
+  const ok = el("button", "btn", submitText);
+  ok.onclick = () => {
+    const err = onSubmit(values());
+    if (err) { toast(err); return; }
+    save();
+    closeModal();
+    render();
+  };
+  actions.append(cancel, ok);
+  sheet.appendChild(actions);
 
-        function logoutApp() {
-            sessionStorage.removeItem('depot_auth');
-            document.getElementById('login-password').value = '';
-            dashboardView.style.display = 'none';
-            loginView.style.display = 'flex';
-        }
+  $("overlay").classList.add("show");
+  return inputs;
+}
+function closeModal() { $("overlay").classList.remove("show"); }
+$("overlay").addEventListener("click", e => { if (e.target.id === "overlay") closeModal(); });
 
-        let articles = JSON.parse(localStorage.getItem('brother_depot_articles')) || [
-            { id: 1, name: "الأسمنت", qty: 120, unit: "كيس", cost: 420, price: 460 },
-            { id: 2, name: "الحديد", qty: 85, unit: "بار", cost: 2800, price: 3050 },
-            { id: 3, name: "المطل", qty: 50, unit: "وحدة", cost: 900, price: 1050 },
-            { id: 4, name: "السك", qty: 45, unit: "وحدة", cost: 750, price: 880 },
-            { id: 5, name: "نشاشات", qty: 60, unit: "وحدة", cost: 500, price: 620 },
-            { id: 6, name: "أنابيب الرقم 25", qty: 90, unit: "وحدة", cost: 650, price: 780 },
-            { id: 7, name: "أنابيب الرقم 28", qty: 75, unit: "وحدة", cost: 800, price: 950 }
-        ];
+/* ---------- العمليات ---------- */
+function openSale() {
+  if (!db.products.length) { toast("أضف صنفاً أولاً"); return; }
+  const first = db.products[0];
+  const inputs = openForm("بيع جديد", [
+    { key: "product", label: "الصنف", type: "select", options: db.products.map(p => [p.id, p.name + " (متوفر " + p.stock + ")"]), value: first.id },
+    { key: "qty", label: "الكمية", type: "number", value: "1" },
+    { key: "price", label: "سعر الوحدة (MRU)", type: "number", value: String(first.sell) },
+    { key: "customer", label: "اسم الزبون", placeholder: "مثال: محمد" },
+    { key: "pay", label: "طريقة الدفع", type: "select", options: [["cash", "نقدي (مدفوع كاملاً)"], ["credit", "آجل (دين كامل)"], ["partial", "دفعة جزئية"]], value: "cash" },
+    { key: "paid", label: "المبلغ المدفوع (للدفعة الجزئية)", type: "number", value: "0" }
+  ], "تسجيل البيع", v => {
+    const p = db.products.find(x => x.id === v.product);
+    const qty = parseInt(v.qty, 10);
+    const price = parseFloat(v.price);
+    if (!p) return "اختر صنفاً";
+    if (!qty || qty <= 0) return "أدخل كمية صحيحة";
+    if (qty > p.stock) return "الكمية أكبر من المتوفر (" + p.stock + ")";
+    if (!(price >= 0)) return "أدخل سعراً صحيحاً";
+    const total = qty * price;
+    let paid = total;
+    if (v.pay === "credit") paid = 0;
+    if (v.pay === "partial") paid = Math.min(Math.max(parseFloat(v.paid) || 0, 0), total);
+    p.stock -= qty;
+    const now = new Date();
+    db.sales.unshift({
+      id: uid(),
+      date: today(),
+      time: pad(now.getHours()) + ":" + pad(now.getMinutes()),
+      customer: v.customer.trim() || "زبون عام",
+      items: [{ pid: p.id, name: p.name, qty, price }],
+      total,
+      paid
+    });
+    toast("تم تسجيل البيع ✓");
+    return null;
+  }, v => {
+    const q = parseFloat(v.qty) || 0, pr = parseFloat(v.price) || 0;
+    return "الإجمالي: " + money(q * pr) + (v.pay === "credit" ? " (آجل)" : "");
+  });
 
-        let salesLog = JSON.parse(localStorage.getItem('brother_depot_sales')) || [];
+  inputs.product.addEventListener("change", () => {
+    const p = db.products.find(x => x.id === inputs.product.value);
+    if (p) {
+      inputs.price.value = p.sell;
+      inputs.price.dispatchEvent(new Event("input"));
+    }
+  });
+}
 
-        function persist() {
-            localStorage.setItem('brother_depot_articles', JSON.stringify(articles));
-            localStorage.setItem('brother_depot_sales', JSON.stringify(salesLog));
-        }
+function openProduct(p) {
+  openForm(p ? "تعديل الصنف" : "إضافة صنف", [
+    { key: "name", label: "اسم الصنف", value: p ? p.name : "", placeholder: "مثال: الرمل" },
+    { key: "unit", label: "وحدة القياس", value: p ? p.unit : "", placeholder: "كيس، قطعة، م²..." },
+    { key: "buy", label: "سعر الشراء", type: "number", value: p ? String(p.buy) : "0" },
+    { key: "sell", label: "سعر البيع", type: "number", value: p ? String(p.sell) : "0" },
+    { key: "stock", label: "الكمية الحالية", type: "number", value: p ? String(p.stock) : "0" },
+    { key: "min", label: "حد التنبيه (الحد الأدنى)", type: "number", value: p ? String(p.min) : "5" }
+  ], "حفظ", v => {
+    const name = v.name.trim();
+    if (!name) return "اكتب اسم الصنف";
+    const data = {
+      name,
+      unit: v.unit.trim() || "وحدة",
+      buy: parseFloat(v.buy) || 0,
+      sell: parseFloat(v.sell) || 0,
+      stock: parseInt(v.stock, 10) || 0,
+      min: parseInt(v.min, 10) || 0
+    };
+    if (p) Object.assign(p, data);
+    else db.products.push({ id: uid(), ...data });
+    return null;
+  });
+}
 
-        function openSubView(id) {
-            document.querySelectorAll('.sub-view').forEach(v => v.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-            renderDashboard();
-        }
+function openRestock(p) {
+  openForm("تزويد المخزون: " + p.name, [
+    { key: "qty", label: "الكمية الواردة (" + p.unit + ")", type: "number", value: "1" },
+    { key: "buy", label: "سعر الشراء للدفعة الجديدة", type: "number", value: String(p.buy), hint: "يُحسب متوسط سعر الشراء تلقائياً" }
+  ], "تزويد", v => {
+    const q = parseInt(v.qty, 10);
+    if (!q || q <= 0) return "أدخل كمية صحيحة";
+    const nb = parseFloat(v.buy);
+    if (nb > 0) p.buy = Math.round((p.buy * p.stock + nb * q) / (p.stock + q));
+    p.stock += q;
+    toast("تم تزويد المخزون ✓");
+    return null;
+  });
+}
 
-        function renderDashboard() {
-            populateSelect();
-            renderKpis();
-            renderRecentSales();
-            renderWatchStock();
-            renderAllStock();
-            renderFullSales();
-        }
+function deleteProduct(p) {
+  if (!confirm("حذف " + p.name + "؟ (المبيعات السابقة تبقى محفوظة)")) return;
+  db.products = db.products.filter(x => x.id !== p.id);
+  save();
+  render();
+  toast("تم الحذف");
+}
 
-        function populateSelect() {
-            const sel = document.getElementById('sale-article-select');
-            sel.innerHTML = '';
-            articles.forEach(a => {
-                const opt = document.createElement('option');
-                opt.value = a.id;
-                opt.textContent = `${a.name} — (${a.qty} ${a.unit})`;
-                sel.appendChild(opt);
-            });
-            syncSalePrice();
-        }
+function openPayDebt(c) {
+  openForm("تسديد دفعة: " + c.name, [
+    { key: "amount", label: "المبلغ المدفوع (MRU)", type: "number", value: String(Math.round(c.debt)), hint: "الدين الحالي: " + money(c.debt) + " — يُوزَّع على أقدم الفواتير أولاً" }
+  ], "تسجيل الدفعة", v => {
+    let amt = parseFloat(v.amount);
+    if (!(amt > 0)) return "أدخل مبلغاً صحيحاً";
+    amt = Math.min(amt, c.debt);
+    const list = db.sales
+      .filter(s => s.customer === c.name && s.total > s.paid)
+      .sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time));
+    for (const s of list) {
+      if (amt <= 0) break;
+      const pay = Math.min(s.total - s.paid, amt);
+      s.paid += pay;
+      amt -= pay;
+    }
+    toast("تم تسجيل الدفعة ✓");
+    return null;
+  });
+}
 
-        function syncSalePrice() {
-            const sel = document.getElementById('sale-article-select');
-            const item = articles.find(a => a.id == sel.value);
-            if (item) {
-                document.getElementById('sale-price').value = item.price;
-            }
-        }
+$("menuBtn").onclick = () => {
+  if (!confirm("إعادة ضبط كل البيانات؟ سيتم حذف كل المبيعات والأصناف التي أضفتها.")) return;
+  db = seed();
+  save();
+  view = "home";
+  render();
+  toast("تمت إعادة الضبط");
+};
 
-        function renderKpis() {
-            const todayCount = salesLog.length;
-            const todaySalesSum = salesLog.reduce((s, x) => s + x.total, 0);
-            const todayProfitSum = salesLog.reduce((s, x) => s + x.profit, 0);
-
-            const refCount = articles.length;
-            const stockVal = articles.reduce((s, a) => s + (a.qty * a.cost), 0);
-            const depletedCount = articles.filter(a => a.qty <= 0).length;
-            const totalUnits = articles.reduce((s, a) => s + a.qty, 0);
-
-            document.getElementById('kpi-today-count').textContent = todayCount;
-            document.getElementById('kpi-today-amount').textContent = `${todaySalesSum.toLocaleString()} MRU`;
-            document.getElementById('kpi-today-profit').textContent = `${todayProfitSum.toLocaleString()} MRU`;
-            document.getElementById('kpi-sales-total-label').textContent = `مبيعات اليوم: ${todaySalesSum.toLocaleString()} MRU`;
-            document.getElementById('kpi-ref-count').textContent = refCount;
-            document.getElementById('kpi-stock-breakdown').textContent = `${totalUnits.toLocaleString()} وحدات/قطع إجمالية`;
-            document.getElementById('kpi-stock-value').textContent = `${stockVal.toLocaleString()} MRU`;
-            document.getElementById('kpi-depleted-label').textContent = `${depletedCount} référence(s) épuisée(s)`;
-        }
-
-        function renderRecentSales() {
-            const box = document.getElementById('recent-sales-box');
-            if (salesLog.length === 0) {
-                box.innerHTML = '<div class="row-meta" style="padding:12px 0; text-align:center;">Aucune vente enregistrée aujourd\'hui</div>';
-                return;
-            }
-            box.innerHTML = salesLog.slice(0, 5).map(s => `
-                <div class="list-row">
-                    <div>
-                        <div class="row-name">${s.client || s.articleName}</div>
-                        <div class="row-meta">${s.articleName} (${s.qty} ${s.unit}) · ${s.time}</div>
-                    </div>
-                    <div class="row-right">
-                        <div class="row-amount">${s.total.toLocaleString()} MRU</div>
-                        <div class="row-profit">+${s.profit.toLocaleString()} MRU ربح</div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function renderWatchStock() {
-            const box = document.getElementById('watch-stock-box');
-            const lowItems = articles.filter(a => a.qty <= 10);
-            if (lowItems.length === 0) {
-                box.innerHTML = '<div class="row-meta" style="padding:10px 0;">جميع المواد متوفرة بكميات جيدة (أكثر من 10).</div>';
-                return;
-            }
-            box.innerHTML = lowItems.map(a => {
-                const isOut = a.qty <= 0;
-                return `
-                    <div class="list-row">
-                        <div>
-                            <div class="row-name">${a.name}</div>
-                            <div class="row-meta">${a.unit}</div>
-                        </div>
-                        <span class="pill ${isOut ? 'pill-out' : 'pill-warn'}">
-                            ${isOut ? 'Épuisé' : `${a.qty} restants`}
-                        </span>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function renderAllStock() {
-            const box = document.getElementById('all-stock-box');
-            box.innerHTML = articles.map(a => `
-                <div class="list-row">
-                    <div>
-                        <div class="row-name">${a.name}</div>
-                        <div class="row-meta">شراء: ${a.cost} MRU · بيع: ${a.price} MRU</div>
-                        <button class="btn-mini-del" onclick="deleteArticle(${a.id})">حذف</button>
-                    </div>
-                    <div class="row-right">
-                        <span class="pill ${a.qty <= 0 ? 'pill-out' : (a.qty <= 10 ? 'pill-warn' : 'pill-ok')}">
-                            ${a.qty} ${a.unit}
-                        </span>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function renderFullSales() {
-            const box = document.getElementById('full-sales-box');
-            if (salesLog.length === 0) {
-                box.innerHTML = '<div class="row-meta" style="padding:12px 0; text-align:center;">لا توجد مبيعات مسجلة.</div>';
-                return;
-            }
-            box.innerHTML = salesLog.map(s => `
-                <div class="list-row">
-                    <div>
-                        <div class="row-name">${s.articleName} — ${s.qty} ${s.unit}</div>
-                        <div class="row-meta">${s.client ? 'الزبون: ' + s.client + ' · ' : ''}${s.time} · سعر البيع: ${s.sellPrice}</div>
-                    </div>
-                    <div class="row-right">
-                        <div class="row-amount">${s.total.toLocaleString()} MRU</div>
-                        <div class="row-profit">ربح: +${s.profit.toLocaleString()} MRU</div>
-                        <button class="btn-mini-del" onclick="cancelSale(${s.id})">إلغاء العملية</button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function submitSale() {
-            const id = document.getElementById('sale-article-select').value;
-            const qty = parseFloat(document.getElementById('sale-qty').value);
-            const sellPrice = parseFloat(document.getElementById('sale-price').value);
-            const client = document.getElementById('sale-client').value.trim();
-
-            const item = articles.find(a => a.id == id);
-            if (!item || isNaN(qty) || qty <= 0 || isNaN(sellPrice) || sellPrice < 0) {
-                alert("يرجى إدخال الكمية وسعر البيع بشكل صحيح.");
-                return;
-            }
-            if (qty > item.qty) {
-                alert(`الكمية المتوفرة هي ${item.qty} ${item.unit} فقط.`);
-                return;
-            }
-
-            item.qty = Number((item.qty - qty).toFixed(3));
-            const total = qty * sellPrice;
-            const profit = (sellPrice - item.cost) * qty;
-            const time = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-
-            salesLog.unshift({
-                id: Date.now(),
-                articleId: item.id,
-                articleName: item.name,
-                unit: item.unit,
-                qty,
-                sellPrice,
-                total,
-                profit,
-                client,
-                time
-            });
-
-            document.getElementById('sale-qty').value = '';
-            document.getElementById('sale-client').value = '';
-            persist();
-            openSubView('home-sub');
-        }
-
-        function submitStock() {
-            const name = document.getElementById('add-name').value.trim();
-            const qty = parseFloat(document.getElementById('add-qty').value);
-            const unit = document.getElementById('add-unit').value.trim() || "وحدة";
-            const cost = parseFloat(document.getElementById('add-cost').value);
-            const price = parseFloat(document.getElementById('add-price').value);
-
-            if (!name || isNaN(qty) || qty < 0 || isNaN(cost) || isNaN(price)) {
-                alert("يرجى ملء بيانات المادة بشكل صحيح.");
-                return;
-            }
-
-            const existing = articles.find(a => a.name.toLowerCase() === name.toLowerCase());
-            if (existing) {
-                existing.qty = Number((existing.qty + qty).toFixed(3));
-                existing.cost = cost;
-                existing.price = price;
-                if (unit) existing.unit = unit;
-            } else {
-                articles.push({
-                    id: Date.now(),
-                    name,
-                    qty,
-                    unit,
-                    cost,
-                    price
-                });
-            }
-
-            document.getElementById('add-name').value = '';
-            document.getElementById('add-qty').value = '';
-            document.getElementById('add-unit').value = '';
-            document.getElementById('add-cost').value = '';
-            document.getElementById('add-price').value = '';
-
-            persist();
-            renderDashboard();
-            alert("تم حفظ المادة في المخزون.");
-        }
-
-        function deleteArticle(id) {
-            if (confirm("حذف هذه المادة من المخزون؟")) {
-                articles = articles.filter(a => a.id !== id);
-                persist();
-                renderDashboard();
-            }
-        }
-
-        function cancelSale(saleId) {
-            const sale = salesLog.find(s => s.id === saleId);
-            if (!sale) return;
-            if (confirm("إلغاء هذه العملية وإعادة الكمية إلى المخزون؟")) {
-                const item = articles.find(a => a.id === sale.articleId);
-                if (item) item.qty = Number((item.qty + sale.qty).toFixed(3));
-                salesLog = salesLog.filter(s => s.id !== saleId);
-                persist();
-                renderDashboard();
-            }
-        }
-
-        function clearSalesLog() {
-            if (confirm("تصفير سجل المبيعات والأرباح؟")) {
-                salesLog = [];
-                persist();
-                renderDashboard();
-            }
-        }
-    </script>
+render();
+</script>
 </body>
 </html>
