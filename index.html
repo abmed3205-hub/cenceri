@@ -37,10 +37,14 @@ h1{font-size:1.6rem;margin:10px 0 4px}
 .card{background:var(--card);border-radius:22px;box-shadow:var(--shadow);border:1px solid var(--line)}
 .stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:18px 0}
 .stat{padding:16px;border-radius:22px;background:var(--card);box-shadow:var(--shadow);border:1px solid var(--line)}
+.stat.clickable{cursor:pointer}
 .stat .top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;color:var(--muted);font-size:.9rem}
 .ico{width:40px;height:40px;border-radius:14px;display:grid;place-items:center;font-size:1.15rem;flex:none}
 .stat .val{font-size:1.2rem;font-weight:700;margin-top:14px;direction:ltr;text-align:right}
 .stat .hint{color:var(--muted);font-size:.8rem;margin-top:4px}
+.ops-banner{margin-bottom:14px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer}
+.ops-banner-left{display:flex;align-items:center;gap:12px}
+.ops-banner-count{font-size:1.15rem;font-weight:700;color:var(--primary);direction:ltr}
 .section-title{display:flex;justify-content:space-between;align-items:center;margin:22px 0 10px}
 .section-title h2{font-size:1.1rem;margin:0}
 .link{color:var(--orange);background:none;border:0;font-weight:600;cursor:pointer;font-family:inherit;font-size:.9rem}
@@ -152,6 +156,7 @@ nav button.active{color:var(--primary);background:var(--primary-soft);font-weigh
     <button type="button" class="drawer-item" id="dQuickStock"><span>📦</span><span id="dLblStock">إدارة المخزون</span></button>
     <button type="button" class="drawer-item" id="dQuickCustomers"><span>👥</span><span id="dLblCustomers">الزبائن والديون</span></button>
     <button type="button" class="drawer-item" id="dQuickSales"><span>📋</span><span id="dLblSales">المبيعات</span></button>
+    <button type="button" class="drawer-item" id="dQuickOps"><span>⚡</span><span id="dLblOps">العمليات</span></button>
 
     <div class="drawer-footer">
       <button type="button" class="btn ghost sm" id="dResetBtn">إعادة ضبط البيانات</button>
@@ -204,6 +209,8 @@ const I18N = {
     homeTitle: "لوحة التحكم",
     homeSub: "ملخص نشاط مخزنك",
     newSaleBtn: "+ بيع جديد",
+    opsFieldTitle: "العمليات",
+    opsFieldSub: "سجل العمليات الجديدة",
     todaySales: "مبيعات اليوم",
     opsCount: "عملية",
     totalIncome: "إجمالي الدخل",
@@ -216,6 +223,14 @@ const I18N = {
     recentSales: "آخر المبيعات",
     viewAll: "عرض الكل",
     noSalesYet: "لا توجد مبيعات بعد",
+    noOpsYet: "لا توجد عمليات بعد",
+    opSale: "عملية بيع جديدة",
+    opDebt: "عملية دين جديدة",
+    opPartial: "عملية دفعة جزئية",
+    opRestock: "عملية تزويد مخزون",
+    opPayDebt: "عملية تسديد دين",
+    opProductAdd: "عملية إضافة صنف",
+    opProductEdit: "عملية تعديل صنف",
     remAmount: "باقي",
     watchStock: "مخزون يحتاج متابعة",
     allStockOk: "كل الأصناف بكميات كافية ✓",
@@ -261,6 +276,8 @@ const I18N = {
     homeTitle: "Tableau de bord",
     homeSub: "Résumé de l'activité du dépôt",
     newSaleBtn: "+ Nouvelle vente",
+    opsFieldTitle: "Opérations",
+    opsFieldSub: "Nouvelles opérations",
     todaySales: "Ventes aujourd'hui",
     opsCount: "opération(s)",
     totalIncome: "Revenu total",
@@ -273,6 +290,14 @@ const I18N = {
     recentSales: "Ventes récentes",
     viewAll: "Tout voir",
     noSalesYet: "Aucune vente enregistrée",
+    noOpsYet: "Aucune opération enregistrée",
+    opSale: "Nouvelle opération de vente",
+    opDebt: "Nouvelle opération de dette",
+    opPartial: "Opération paiement partiel",
+    opRestock: "Opération réapprovisionnement",
+    opPayDebt: "Opération paiement dette",
+    opProductAdd: "Opération ajout article",
+    opProductEdit: "Opération modification article",
     remAmount: "Reste",
     watchStock: "Stock à surveiller",
     allStockOk: "Tous les articles sont suffisants ✓",
@@ -318,8 +343,10 @@ const I18N = {
     homeTitle: "Dashboard",
     homeSub: "Summary of your depot activity",
     newSaleBtn: "+ New sale",
+    opsFieldTitle: "Operations",
+    opsFieldSub: "New operations log",
     todaySales: "Today's sales",
-    opsCount: "sale(s)",
+    opsCount: "operation(s)",
     totalIncome: "Total revenue",
     productsLabel: "Items",
     unitsInStock: "unit(s) in stock",
@@ -330,6 +357,14 @@ const I18N = {
     recentSales: "Recent sales",
     viewAll: "View all",
     noSalesYet: "No sales yet",
+    noOpsYet: "No operations yet",
+    opSale: "New sale operation",
+    opDebt: "New debt operation",
+    opPartial: "Partial payment operation",
+    opRestock: "Stock restock operation",
+    opPayDebt: "Debt payment operation",
+    opProductAdd: "Add item operation",
+    opProductEdit: "Edit item operation",
     remAmount: "Due",
     watchStock: "Stock to watch",
     allStockOk: "All items have sufficient stock ✓",
@@ -390,6 +425,7 @@ function applyLanguage(lang) {
   $("dLblStock").textContent = cfg.stockTitle;
   $("dLblCustomers").textContent = cfg.customersTitle;
   $("dLblSales").textContent = cfg.salesTitle;
+  $("dLblOps").textContent = cfg.opsFieldTitle;
   $("dResetBtn").textContent = cfg.resetBtn;
   $("dLogoutBtn").textContent = cfg.logoutBtn;
 
@@ -420,21 +456,35 @@ function toast(msg) {
   t._h = setTimeout(() => t.classList.remove("show"), 2200);
 }
 
-/* بداية نظيفة من الصفر بدون أي مبالغ أو أصناف أو مبيعات مسبقة */
+/* بداية نظيفة من الصفر بدون أي مبالغ أو أصناف أو مبيعات أو عمليات مسبقة */
 function seed() {
   return {
     products: [],
-    sales: []
+    sales: [],
+    operations: []
   };
 }
 function load() {
   try {
     const r = localStorage.getItem(KEY);
-    if (r) return JSON.parse(r);
+    if (r) {
+      const parsed = JSON.parse(r);
+      if (!Array.isArray(parsed.operations)) parsed.operations = [];
+      return parsed;
+    }
   } catch (e) {}
   return seed();
 }
 function save() { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) {} }
+
+function recordOp(typeKey, details, amountText) {
+  db.operations.unshift({
+    id: uid(),
+    typeKey,
+    details,
+    amountText: amountText || ""
+  });
+}
 
 let db = load();
 let view = "home";
@@ -448,6 +498,7 @@ function stats() {
     todayAmt: sum(todaySales, s => s.total),
     revenue: sum(db.sales, s => s.total),
     salesCount: db.sales.length,
+    opsTotal: db.operations.length,
     refs: db.products.length,
     units: sum(db.products, p => p.stock),
     value: sum(db.products, p => p.stock * p.buy),
@@ -462,8 +513,8 @@ function stockBadge(p) {
   return el("span", "badge b-ok", p.stock + " " + tr("availBadge"));
 }
 
-function statCard(icon, bg, label, value, hint) {
-  const c = el("div", "stat");
+function statCard(icon, bg, label, value, hint, onClick) {
+  const c = el("div", "stat" + (onClick ? " clickable" : ""));
   const top = el("div", "top");
   top.appendChild(el("span", "", label));
   const ic = el("div", "ico", icon);
@@ -472,6 +523,7 @@ function statCard(icon, bg, label, value, hint) {
   c.appendChild(top);
   c.appendChild(el("div", "val", value));
   if (hint) c.appendChild(el("div", "hint", hint));
+  if (onClick) c.onclick = onClick;
   return c;
 }
 
@@ -486,6 +538,7 @@ function sectionTitle(text, link) {
   return h;
 }
 
+/* عرض المبيعات بدون تاريخ أو وقت أو سنة */
 function salesList(list) {
   const c = el("div", "card list");
   if (!list.length) { c.appendChild(el("div", "empty", tr("noSalesYet"))); return c; }
@@ -496,7 +549,7 @@ function salesList(list) {
     r.appendChild(ic);
     const m = el("div", "meta");
     m.appendChild(el("div", "name", s.customer));
-    m.appendChild(el("div", "sub2", s.date + " · " + s.time + " · " + s.items.map(i => i.name + " ×" + i.qty).join("، ")));
+    m.appendChild(el("div", "sub2", s.items.map(i => i.name + " ×" + i.qty).join("، ")));
     r.appendChild(m);
     const right = el("div");
     right.style.textAlign = "left";
@@ -509,14 +562,54 @@ function salesList(list) {
   return c;
 }
 
+/* عرض العمليات الجديدة فقط بدون تاريخ أو وقت أو سنة */
+function operationsList(list) {
+  const c = el("div", "card list");
+  if (!list.length) { c.appendChild(el("div", "empty", tr("noOpsYet"))); return c; }
+  list.forEach(op => {
+    const r = el("div", "row");
+    const ic = el("div", "ico", "⚡");
+    ic.style.background = "var(--primary-soft)";
+    r.appendChild(ic);
+    const m = el("div", "meta");
+    m.appendChild(el("div", "name", tr(op.typeKey)));
+    if (op.details) m.appendChild(el("div", "sub2", op.details));
+    r.appendChild(m);
+    if (op.amountText) {
+      const right = el("div");
+      right.style.textAlign = "left";
+      right.appendChild(el("div", "amount", op.amountText));
+      r.appendChild(right);
+    }
+    c.appendChild(r);
+  });
+  return c;
+}
+
 function buildHome() {
   const s = stats();
   const wrap = el("div");
   wrap.appendChild(el("h1", "", tr("homeTitle")));
   wrap.appendChild(el("p", "sub", tr("homeSub")));
   const big = el("button", "btn block", tr("newSaleBtn"));
+  big.style.marginBottom = "14px";
   big.onclick = () => openSale();
   wrap.appendChild(big);
+
+  /* حقل العمليات المهم في لوحة التحكم */
+  const opsCard = el("div", "card ops-banner");
+  const opsLeft = el("div", "ops-banner-left");
+  const opsIc = el("div", "ico", "⚡");
+  opsIc.style.background = "var(--primary-soft)";
+  opsLeft.appendChild(opsIc);
+  const opsText = el("div");
+  opsText.appendChild(el("div", "name", tr("opsFieldTitle")));
+  opsText.appendChild(el("div", "sub2", tr("opsFieldSub")));
+  opsLeft.appendChild(opsText);
+  opsCard.appendChild(opsLeft);
+  opsCard.appendChild(el("div", "ops-banner-count", num(s.opsTotal)));
+  opsCard.onclick = () => go("ops");
+  wrap.appendChild(opsCard);
 
   const grid = el("div", "stats");
   grid.appendChild(statCard("🧾", "var(--orange-soft)", tr("todaySales"), money(s.todayAmt), s.todayCount + " " + tr("opsCount")));
@@ -552,6 +645,14 @@ function buildHome() {
     lc.appendChild(r);
   });
   wrap.appendChild(lc);
+  return wrap;
+}
+
+function buildOps() {
+  const wrap = el("div");
+  wrap.appendChild(el("h1", "", tr("opsFieldTitle")));
+  wrap.appendChild(el("p", "sub", tr("opsFieldSub")));
+  wrap.appendChild(operationsList(db.operations));
   return wrap;
 }
 
@@ -657,7 +758,7 @@ function buildCustomers() {
 function render() {
   const main = $("main");
   main.innerHTML = "";
-  const builders = { home: buildHome, stock: buildStock, sales: buildSales, customers: buildCustomers };
+  const builders = { home: buildHome, stock: buildStock, sales: buildSales, customers: buildCustomers, ops: buildOps };
   main.appendChild(builders[view]());
 
   const nav = $("nav");
@@ -675,6 +776,7 @@ function render() {
   $("dQuickStock").classList.toggle("active", view === "stock");
   $("dQuickSales").classList.toggle("active", view === "sales");
   $("dQuickCustomers").classList.toggle("active", view === "customers");
+  $("dQuickOps").classList.toggle("active", view === "ops");
   window.scrollTo(0, 0);
 }
 function go(v) { view = v; render(); }
@@ -696,6 +798,7 @@ $("dQuickSale").onclick = () => { closeDrawer(); openSale(); };
 $("dQuickStock").onclick = () => { closeDrawer(); go("stock"); };
 $("dQuickSales").onclick = () => { closeDrawer(); go("sales"); };
 $("dQuickCustomers").onclick = () => { closeDrawer(); go("customers"); };
+$("dQuickOps").onclick = () => { closeDrawer(); go("ops"); };
 
 $("dResetBtn").onclick = () => {
   closeDrawer();
@@ -812,16 +915,18 @@ function openSale() {
     if (v.pay === "credit") paid = 0;
     if (v.pay === "partial") paid = Math.min(Math.max(parseFloat(v.paid) || 0, 0), total);
     p.stock -= qty;
-    const now = new Date();
+    const customerName = v.customer.trim() || "زبون عام";
     db.sales.unshift({
       id: uid(),
       date: today(),
-      time: pad(now.getHours()) + ":" + pad(now.getMinutes()),
-      customer: v.customer.trim() || "زبون عام",
+      time: "",
+      customer: customerName,
       items: [{ pid: p.id, name: p.name, qty, price }],
       total,
       paid
     });
+    const opType = v.pay === "credit" ? "opDebt" : (v.pay === "partial" ? "opPartial" : "opSale");
+    recordOp(opType, customerName + " · " + p.name + " ×" + qty, money(total));
     toast("تم تسجيل البيع ✓");
     return null;
   }, v => {
@@ -857,8 +962,13 @@ function openProduct(p) {
       stock: parseInt(v.stock, 10) || 0,
       min: parseInt(v.min, 10) || 0
     };
-    if (p) Object.assign(p, data);
-    else db.products.push({ id: uid(), ...data });
+    if (p) {
+      Object.assign(p, data);
+      recordOp("opProductEdit", name + " · " + data.stock + " " + data.unit, money(data.sell));
+    } else {
+      db.products.push({ id: uid(), ...data });
+      recordOp("opProductAdd", name + " · " + data.stock + " " + data.unit, money(data.sell));
+    }
     return null;
   });
 }
@@ -873,6 +983,7 @@ function openRestock(p) {
     const nb = parseFloat(v.buy);
     if (nb > 0) p.buy = Math.round((p.buy * p.stock + nb * q) / (p.stock + q));
     p.stock += q;
+    recordOp("opRestock", p.name + " +" + q + " " + p.unit, money((nb > 0 ? nb : p.buy) * q));
     toast("تم تزويد المخزون ✓");
     return null;
   });
@@ -893,6 +1004,7 @@ function openPayDebt(c) {
     let amt = parseFloat(v.amount);
     if (!(amt > 0)) return "أدخل مبلغاً صحيحاً";
     amt = Math.min(amt, c.debt);
+    const settledAmt = amt;
     const list = db.sales
       .filter(s => s.customer === c.name && s.total > s.paid)
       .sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time));
@@ -902,6 +1014,7 @@ function openPayDebt(c) {
       s.paid += pay;
       amt -= pay;
     }
+    recordOp("opPayDebt", c.name, money(settledAmt));
     toast("تم تسجيل الدفعة ✓");
     return null;
   });
