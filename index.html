@@ -141,7 +141,7 @@ loginForm.addEventListener("submit", function(e) {
   }
 });
 
-const KEY = "depot-app-v1";
+const KEY = "depot-app-v2-zero";
 const $ = id => document.getElementById(id);
 
 function el(tag, cls, text) {
@@ -166,20 +166,11 @@ function toast(msg) {
   t._h = setTimeout(() => t.classList.remove("show"), 2200);
 }
 
+/* بداية نظيفة من الصفر بدون أي مبالغ أو أصناف أو مبيعات مسبقة */
 function seed() {
   return {
-    products: [
-      { id: "p1", name: "الأسمنت", unit: "كيس", buy: 800, sell: 950, stock: 120, min: 20 },
-      { id: "p2", name: "الحديد", unit: "قضيب 12م", buy: 1200, sell: 1400, stock: 40, min: 10 },
-      { id: "p3", name: "الجص (المطل)", unit: "كيس", buy: 500, sell: 650, stock: 60, min: 15 },
-      { id: "p4", name: "السيراميك", unit: "م²", buy: 900, sell: 1200, stock: 80, min: 20 },
-      { id: "p5", name: "أنابيب رقم 25", unit: "قطعة", buy: 350, sell: 480, stock: 4, min: 10 },
-      { id: "p6", name: "أنابيب رقم 28", unit: "قطعة", buy: 420, sell: 560, stock: 3, min: 10 }
-    ],
-    sales: [
-      { id: uid(), date: today(), time: "09:57", customer: "زبون تجريبي", items: [{ pid: "p2", name: "الحديد", qty: 1, price: 1400 }], total: 1400, paid: 1400 },
-      { id: uid(), date: daysAgo(-1), time: "17:00", customer: "زبون آجل", items: [{ pid: "p1", name: "الأسمنت", qty: 20, price: 950 }], total: 19000, paid: 0 }
-    ]
+    products: [],
+    sales: []
   };
 }
 function load() {
@@ -572,7 +563,7 @@ function openSale() {
 
 function openProduct(p) {
   openForm(p ? "تعديل الصنف" : "إضافة صنف", [
-    { key: "name", label: "اسم الصنف", value: p ? p.name : "", placeholder: "مثال: الرمل" },
+    { key: "name", label: "اسم الصنف", value: p ? p.name : "", placeholder: "مثال: الأسمنت، الحديد، المطل..." },
     { key: "unit", label: "وحدة القياس", value: p ? p.unit : "", placeholder: "كيس، قطعة، م²..." },
     { key: "buy", label: "سعر الشراء", type: "number", value: p ? String(p.buy) : "0" },
     { key: "sell", label: "سعر البيع", type: "number", value: p ? String(p.sell) : "0" },
@@ -640,12 +631,13 @@ function openPayDebt(c) {
 }
 
 $("menuBtn").onclick = () => {
-  if (!confirm("إعادة ضبط كل البيانات؟ سيتم حذف كل المبيعات والأصناف التي أضفتها.")) return;
+  if (!confirm("إعادة ضبط كل البيانات؟ سيتم حذف كل المبيعات والأصناف والمبالغ والبدء من الصفر.")) return;
+  try { localStorage.removeItem(KEY); } catch (e) {}
   db = seed();
   save();
   view = "home";
   render();
-  toast("تمت إعادة الضبط");
+  toast("تمت إعادة الضبط إلى الصفر");
 };
 
 render();
