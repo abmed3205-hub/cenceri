@@ -79,7 +79,7 @@ nav button.active{color:var(--primary);background:var(--primary-soft);font-weigh
 .field label{font-size:.88rem;color:var(--muted)}
 .field input,.field select{padding:13px;border-radius:14px;border:1px solid var(--line);background:var(--bg);color:var(--text);font-size:1rem;font-family:inherit;width:100%}
 .hint2{color:var(--muted);font-size:.8rem}
-.total-box{background:var(--primary-soft);color:var(--primary);border-radius:16px;padding:12px;text-align:center;font-weight:700;margin-bottom:12px;direction:ltr;display:none}
+.total-box{background:var(--primary-soft);color:var(--primary);border-radius:16px;padding:12px;text-align:center;font-weight:700;margin-bottom:12px;direction:ltr;display:none;line-height:1.5}
 .form-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
 #toast{position:fixed;top:18px;left:50%;transform:translateX(-50%) translateY(-120px);background:#111827;color:#fff;padding:12px 18px;border-radius:14px;transition:transform .3s;z-index:30;max-width:90%;text-align:center}
 #toast.show{transform:translateX(-50%) translateY(0)}
@@ -447,9 +447,9 @@ function dateStr(d) { return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-"
 function timeStr(d) { return pad(d.getHours()) + ":" + pad(d.getMinutes()); }
 function today() { return dateStr(new Date()); }
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
-function money(n) { return Math.round(n || 0).toLocaleString("en-US") + " MRU"; }
-function num(n) { return Math.round(n || 0).toLocaleString("en-US"); }
-function sum(arr, f) { return arr.reduce((a, x) => a + (f(x) || 0), 0); }
+function money(n) { return Math.round(Number(n) || 0).toLocaleString("en-US") + " XOF"; }
+function num(n) { return Math.round(Number(n) || 0).toLocaleString("en-US"); }
+function sum(arr, f) { return arr.reduce((a, x) => a + (Number(f(x)) || 0), 0); }
 function toast(msg) {
   const t = $("toast");
   t.textContent = msg;
@@ -561,14 +561,13 @@ function salesList(list) {
     right.style.textAlign = "left";
     right.appendChild(el("div", "amount", money(s.total)));
     const rem = s.total - s.paid;
-    if (rem > 0) right.appendChild(el("span", "badge b-credit", tr("remAmount") + " " + num(rem)));
+    if (rem > 0) right.appendChild(el("span", "badge b-credit", tr("remAmount") + " " + num(rem) + " XOF"));
     r.appendChild(right);
     c.appendChild(r);
   });
   return c;
 }
 
-/* عرض العمليات مع كامل التفاصيل والتاريخ والوقت والسنة أسفلها مباشرة */
 function operationsList(list) {
   const c = el("div", "card list");
   if (!list.length) { c.appendChild(el("div", "empty", tr("noOpsYet"))); return c; }
@@ -604,7 +603,6 @@ function buildHome() {
   big.onclick = () => openSale();
   wrap.appendChild(big);
 
-  /* حقل العمليات المهم في لوحة التحكم */
   const opsCard = el("div", "card ops-banner");
   const opsLeft = el("div", "ops-banner-left");
   const opsIc = el("div", "ico", "⚡");
@@ -679,7 +677,7 @@ function buildStock() {
     const r = el("div", "row");
     const m = el("div", "meta");
     m.appendChild(el("div", "name", p.name));
-    m.appendChild(el("div", "sub2", tr("buyShort") + " " + num(p.buy) + " · " + tr("sellShort") + " " + num(p.sell) + " · " + p.unit));
+    m.appendChild(el("div", "sub2", tr("buyShort") + " " + money(p.buy) + " · " + tr("sellShort") + " " + money(p.sell) + " · " + p.unit));
     r.appendChild(m);
     r.appendChild(stockBadge(p));
     list.appendChild(r);
@@ -899,30 +897,46 @@ function openForm(title, fields, submitText, onSubmit, onLive) {
 function closeModal() { $("overlay").classList.remove("show"); }
 $("overlay").addEventListener("click", e => { if (e.target.id === "overlay") closeModal(); });
 
-/* ---------- العمليات ---------- */
+/* ---------- العمليات والآلة الحسابية المنطقية ---------- */
+function calcSaleNumbers(v) {
+  const qty = Math.max(0, Number(v.qty) || 0);
+  const price = Math.max(0, Number(v.price) || 0);
+  const total = qty * price;
+  let paid = total;
+  if (v.pay === "credit") {
+    paid = 0;
+  } else if (v.pay === "partial") {
+    const rawPaid = Math.max(0, Number(v.paid) || 0);
+    paid = Math.min(rawPaid, total);
+  }
+  const due = Math.max(0, total - paid);
+  return { qty, price, total, paid, due };
+}
+
 function openSale() {
   if (!db.products.length) { toast("أضف صنفاً أولاً"); return; }
   const first = db.products[0];
   const inputs = openForm("بيع جديد", [
     { key: "product", label: "الصنف", type: "select", options: db.products.map(p => [p.id, p.name + " (متوفر " + p.stock + ")"]), value: first.id },
-    { key: "qty", label: "الكمية", type: "number", value: "1" },
-    { key: "price", label: "سعر الوحدة (MRU)", type: "number", value: String(first.sell) },
+    { key: "qty", label: "الكمية", type: "number", value: "5" },
+    { key: "price", label: "سعر الوحدة (XOF)", type: "number", value: String(first.sell) },
     { key: "customer", label: "اسم الزبون", placeholder: "مثال: محمد" },
     { key: "pay", label: "طريقة الدفع", type: "select", options: [["cash", "نقدي (مدفوع كاملاً)"], ["credit", "آجل (دين كامل)"], ["partial", "دفعة جزئية"]], value: "cash" },
     { key: "paid", label: "المبلغ المدفوع (للدفعة الجزئية)", type: "number", value: "0" }
   ], "تسجيل البيع", v => {
     const p = db.products.find(x => x.id === v.product);
-    const qty = parseInt(v.qty, 10);
-    const price = parseFloat(v.price);
+    const qty = Number(v.qty);
+    const price = Number(v.price);
     if (!p) return "اختر صنفاً";
-    if (!qty || qty <= 0) return "أدخل كمية صحيحة";
+    if (!Number.isFinite(qty) || qty <= 0) return "أدخل كمية صحيحة";
     if (qty > p.stock) return "الكمية أكبر من المتوفر (" + p.stock + ")";
-    if (!(price >= 0)) return "أدخل سعراً صحيحاً";
-    const total = qty * price;
-    let paid = total;
-    if (v.pay === "credit") paid = 0;
-    if (v.pay === "partial") paid = Math.min(Math.max(parseFloat(v.paid) || 0, 0), total);
-    p.stock -= qty;
+    if (!Number.isFinite(price) || price < 0) return "أدخل سعراً صحيحاً";
+    if (v.pay === "partial") {
+      const rawPaid = Number(v.paid);
+      if (!Number.isFinite(rawPaid) || rawPaid < 0) return "أدخل مبلغاً مدفوعاً صحيحاً";
+    }
+    const calc = calcSaleNumbers(v);
+    p.stock = Math.max(0, p.stock - qty);
     const now = new Date();
     const customerName = v.customer.trim() || "زبون عام";
     db.sales.unshift({
@@ -931,17 +945,23 @@ function openSale() {
       time: timeStr(now),
       customer: customerName,
       items: [{ pid: p.id, name: p.name, qty, price }],
-      total,
-      paid
+      total: calc.total,
+      paid: calc.paid
     });
     const opType = v.pay === "credit" ? "opDebt" : (v.pay === "partial" ? "opPartial" : "opSale");
-    const extraPay = v.pay === "partial" ? " · مدفوع " + money(paid) : "";
-    recordOp(opType, customerName + " · " + p.name + " ×" + qty + extraPay, money(total));
+    const extraPay = v.pay === "partial" ? " · مدفوع " + money(calc.paid) + " · باقي " + money(calc.due) : (v.pay === "credit" ? " · دين " + money(calc.due) : "");
+    recordOp(opType, customerName + " · " + p.name + " ×" + qty + extraPay, money(calc.total));
     toast("تم تسجيل البيع ✓");
     return null;
   }, v => {
-    const q = parseFloat(v.qty) || 0, pr = parseFloat(v.price) || 0;
-    return "الإجمالي: " + money(q * pr) + (v.pay === "credit" ? " (آجل)" : "");
+    const calc = calcSaleNumbers(v);
+    let line = "الإجمالي: " + money(calc.total);
+    if (v.pay === "credit") {
+      line += " | دين: " + money(calc.due);
+    } else if (v.pay === "partial") {
+      line += " | مدفوع: " + money(calc.paid) + " | باقي: " + money(calc.due);
+    }
+    return line;
   });
 
   inputs.product.addEventListener("change", () => {
@@ -957,8 +977,8 @@ function openProduct(p) {
   openForm(p ? "تعديل الصنف" : "إضافة صنف", [
     { key: "name", label: "اسم الصنف", value: p ? p.name : "", placeholder: "مثال: الأسمنت، الحديد، المطل..." },
     { key: "unit", label: "وحدة القياس", value: p ? p.unit : "", placeholder: "كيس، قطعة، م²..." },
-    { key: "buy", label: "سعر الشراء", type: "number", value: p ? String(p.buy) : "0" },
-    { key: "sell", label: "سعر البيع", type: "number", value: p ? String(p.sell) : "0" },
+    { key: "buy", label: "سعر الشراء (XOF)", type: "number", value: p ? String(p.buy) : "0" },
+    { key: "sell", label: "سعر البيع (XOF)", type: "number", value: p ? String(p.sell) : "0" },
     { key: "stock", label: "الكمية الحالية", type: "number", value: p ? String(p.stock) : "0" },
     { key: "min", label: "حد التنبيه (الحد الأدنى)", type: "number", value: p ? String(p.min) : "5" }
   ], "حفظ", v => {
@@ -967,10 +987,10 @@ function openProduct(p) {
     const data = {
       name,
       unit: v.unit.trim() || "وحدة",
-      buy: parseFloat(v.buy) || 0,
-      sell: parseFloat(v.sell) || 0,
-      stock: parseInt(v.stock, 10) || 0,
-      min: parseInt(v.min, 10) || 0
+      buy: Math.max(0, Number(v.buy) || 0),
+      sell: Math.max(0, Number(v.sell) || 0),
+      stock: Math.max(0, Number(v.stock) || 0),
+      min: Math.max(0, Number(v.min) || 0)
     };
     if (p) {
       Object.assign(p, data);
@@ -986,17 +1006,27 @@ function openProduct(p) {
 function openRestock(p) {
   openForm("تزويد المخزون: " + p.name, [
     { key: "qty", label: "الكمية الواردة (" + p.unit + ")", type: "number", value: "1" },
-    { key: "buy", label: "سعر الشراء للدفعة الجديدة", type: "number", value: String(p.buy), hint: "يُحسب متوسط سعر الشراء تلقائياً" }
+    { key: "buy", label: "سعر الشراء للدفعة الجديدة (XOF)", type: "number", value: String(p.buy), hint: "يُحسب متوسط سعر الشراء تلقائياً" }
   ], "تزويد", v => {
-    const q = parseInt(v.qty, 10);
-    if (!q || q <= 0) return "أدخل كمية صحيحة";
-    const nb = parseFloat(v.buy);
-    if (nb > 0) p.buy = Math.round((p.buy * p.stock + nb * q) / (p.stock + q));
+    const q = Number(v.qty);
+    if (!Number.isFinite(q) || q <= 0) return "أدخل كمية صحيحة";
+    const nb = Number(v.buy);
+    const unitCost = (Number.isFinite(nb) && nb > 0) ? nb : p.buy;
+    if (Number.isFinite(nb) && nb > 0) {
+      const totalPrev = p.buy * p.stock;
+      const totalNew = nb * q;
+      const nextStock = p.stock + q;
+      p.buy = nextStock > 0 ? (totalPrev + totalNew) / nextStock : nb;
+    }
     p.stock += q;
-    const unitCost = nb > 0 ? nb : p.buy;
     recordOp("opRestock", p.name + " +" + q + " " + p.unit + " · الإجمالي في المخزون " + p.stock, money(unitCost * q));
     toast("تم تزويد المخزون ✓");
     return null;
+  }, v => {
+    const q = Math.max(0, Number(v.qty) || 0);
+    const nb = Number(v.buy);
+    const unitCost = (Number.isFinite(nb) && nb > 0) ? nb : p.buy;
+    return "تكلفة التزويد: " + money(q * unitCost);
   });
 }
 
@@ -1010,10 +1040,10 @@ function deleteProduct(p) {
 
 function openPayDebt(c) {
   openForm("تسديد دفعة: " + c.name, [
-    { key: "amount", label: "المبلغ المدفوع (MRU)", type: "number", value: String(Math.round(c.debt)), hint: "الدين الحالي: " + money(c.debt) + " — يُوزَّع على أقدم الفواتير أولاً" }
+    { key: "amount", label: "المبلغ المدفوع (XOF)", type: "number", value: String(Math.round(c.debt)), hint: "الدين الحالي: " + money(c.debt) + " — يُوزَّع على أقدم الفواتير أولاً" }
   ], "تسجيل الدفعة", v => {
-    let amt = parseFloat(v.amount);
-    if (!(amt > 0)) return "أدخل مبلغاً صحيحاً";
+    let amt = Number(v.amount);
+    if (!Number.isFinite(amt) || amt <= 0) return "أدخل مبلغاً صحيحاً";
     amt = Math.min(amt, c.debt);
     const settledAmt = amt;
     const list = db.sales
@@ -1028,6 +1058,11 @@ function openPayDebt(c) {
     recordOp("opPayDebt", c.name + " · تسديد دفعة", money(settledAmt));
     toast("تم تسجيل الدفعة ✓");
     return null;
+  }, v => {
+    const raw = Math.max(0, Number(v.amount) || 0);
+    const pay = Math.min(raw, c.debt);
+    const rem = Math.max(0, c.debt - pay);
+    return "الدفعة: " + money(pay) + " | الدين المتبقي: " + money(rem);
   });
 }
 
