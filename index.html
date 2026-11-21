@@ -626,7 +626,6 @@
         </header>
 
         <div class="page-wrap">
-            <!-- الصفحة الرئيسية للوحة (Tableau de bord) -->
             <div id="home-sub" class="sub-view active">
                 <h2 class="page-heading">Tableau de bord</h2>
                 <p class="page-sub">Voici le résumé de l'activité de votre dépôt.</p>
@@ -649,7 +648,7 @@
                             <span class="kpi-badge" style="background:#ecfdf5; color:#059669;">💼</span>
                         </div>
                         <div class="kpi-main" id="kpi-today-profit">0 MRU</div>
-                        <div class="kpi-sub" id="kpi-sales-total-label">Chiffre: 0 MRU</div>
+                        <div class="kpi-sub" id="kpi-sales-total-label">مبيعات اليوم: 0 MRU</div>
                     </div>
 
                     <div class="kpi-card">
@@ -697,7 +696,6 @@
                     <span style="color:#94a3b8;">→</span>
                 </div>
 
-                <!-- Ventes récentes -->
                 <div class="panel-card" style="margin-top:16px;">
                     <div class="panel-header">
                         <div>
@@ -709,7 +707,6 @@
                     <div id="recent-sales-box"></div>
                 </div>
 
-                <!-- Stock à surveiller -->
                 <div class="panel-card">
                     <div class="panel-header">
                         <div>
@@ -722,7 +719,6 @@
                 </div>
             </div>
 
-            <!-- شاشة تسجيل بيع جديد -->
             <div id="sale-sub" class="sub-view">
                 <button class="btn-back" onclick="openSubView('home-sub')">← Retour au tableau de bord</button>
                 <div class="panel-card">
@@ -749,14 +745,13 @@
                 </div>
             </div>
 
-            <!-- شاشة إدارة المخزون وإضافة المواد -->
             <div id="stock-sub" class="sub-view">
                 <button class="btn-back" onclick="openSubView('home-sub')">← Retour au tableau de bord</button>
                 <div class="panel-card">
                     <div class="panel-header">
                         <div class="panel-title">Ajouter ou recharger un matériau / إضافة أو تزويد مادة</div>
                     </div>
-                    <input type="text" id="add-name" class="ctrl-input" placeholder="اسم المادة (مثال: الأسمنت، حديد 12، المطل، السك، نشاشات، أنابيب 25، أنابيب 28)">
+                    <input type="text" id="add-name" class="ctrl-input" placeholder="اسم المادة (الأسمنت، الحديد، المطل، السك، نشاشات، أنابيب 25، أنابيب 28)">
                     <div class="form-row-2">
                         <input type="number" id="add-qty" class="ctrl-input" placeholder="الكمية / Quantité" step="any" min="0">
                         <input type="text" id="add-unit" class="ctrl-input" placeholder="الوحدة (طن / كيس / حبة / متر)">
@@ -776,7 +771,6 @@
                 </div>
             </div>
 
-            <!-- شاشة سجل المبيعات والأرباح -->
             <div id="sales-sub" class="sub-view">
                 <button class="btn-back" onclick="openSubView('home-sub')">← Retour au tableau de bord</button>
                 <div class="panel-card">
@@ -842,16 +836,14 @@
             loginView.style.display = 'flex';
         }
 
-        // المواد المطلوبة لأخيك: الأسمنت، الحديد، المطل، السك، نشاشات، أنابيب الرقم 25، أنابيب الرقم 28
         let articles = JSON.parse(localStorage.getItem('brother_depot_articles')) || [
-            { id: 1, name: "الأسمنت (Ciment)", qty: 120, unit: "كيس", cost: 420, price: 460 },
-            { id: 2, name: "الحديد 12 (Fer 12)", qty: 85, unit: "بار", cost: 2800, price: 3050 },
-            { id: 3, name: "الحديد 10 (Fer 10)", qty: 70, unit: "بار", cost: 2100, price: 2300 },
-            { id: 4, name: "المطل", qty: 50, unit: "وحدة", cost: 900, price: 1050 },
-            { id: 5, name: "السك", qty: 45, unit: "وحدة", cost: 750, price: 880 },
-            { id: 6, name: "نشاشات", qty: 60, unit: "وحدة", cost: 500, price: 620 },
-            { id: 7, name: "أنابيب الرقم 25", qty: 90, unit: "وحدة", cost: 650, price: 780 },
-            { id: 8, name: "أنابيب الرقم 28", qty: 75, unit: "وحدة", cost: 800, price: 950 }
+            { id: 1, name: "الأسمنت", qty: 120, unit: "كيس", cost: 420, price: 460 },
+            { id: 2, name: "الحديد", qty: 85, unit: "بار", cost: 2800, price: 3050 },
+            { id: 3, name: "المطل", qty: 50, unit: "وحدة", cost: 900, price: 1050 },
+            { id: 4, name: "السك", qty: 45, unit: "وحدة", cost: 750, price: 880 },
+            { id: 5, name: "نشاشات", qty: 60, unit: "وحدة", cost: 500, price: 620 },
+            { id: 6, name: "أنابيب الرقم 25", qty: 90, unit: "وحدة", cost: 650, price: 780 },
+            { id: 7, name: "أنابيب الرقم 28", qty: 75, unit: "وحدة", cost: 800, price: 950 }
         ];
 
         let salesLog = JSON.parse(localStorage.getItem('brother_depot_sales')) || [];
@@ -905,7 +897,6 @@
             const refCount = articles.length;
             const stockVal = articles.reduce((s, a) => s + (a.qty * a.cost), 0);
             const depletedCount = articles.filter(a => a.qty <= 0).length;
-
             const totalUnits = articles.reduce((s, a) => s + a.qty, 0);
 
             document.getElementById('kpi-today-count').textContent = todayCount;
