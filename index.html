@@ -78,6 +78,21 @@ nav button.active{color:var(--primary);background:var(--primary-soft);font-weigh
 .form-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
 #toast{position:fixed;top:18px;left:50%;transform:translateX(-50%) translateY(-120px);background:#111827;color:#fff;padding:12px 18px;border-radius:14px;transition:transform .3s;z-index:30;max-width:90%;text-align:center}
 #toast.show{transform:translateX(-50%) translateY(0)}
+
+/* لوحة التحكم الجانبية */
+#drawerOverlay{position:fixed;inset:0;background:rgba(10,16,30,.45);display:none;z-index:25}
+#drawerOverlay.show{display:flex}
+.drawer-panel{width:84%;max-width:340px;height:100%;background:var(--card);padding:calc(18px + env(safe-area-inset-top,0px)) 16px calc(20px + env(safe-area-inset-bottom,0px));overflow:auto;display:flex;flex-direction:column;gap:10px;box-shadow:0 12px 32px rgba(0,0,0,.2)}
+.drawer-top{display:flex;align-items:center;justify-content:space-between;padding-bottom:12px;border-bottom:1px solid var(--line)}
+.drawer-close{width:36px;height:36px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text);font-size:1.1rem;cursor:pointer}
+.drawer-item{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;border:0;background:transparent;color:var(--text);font-family:inherit;font-size:.98rem;font-weight:600;cursor:pointer;text-align:start;width:100%}
+.drawer-item.active{background:var(--primary);color:#fff}
+.drawer-item:not(.active):hover{background:var(--bg)}
+.drawer-section{font-size:.82rem;color:var(--muted);font-weight:700;margin-top:8px;padding:0 4px}
+.lang-box{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;background:var(--bg);padding:6px;border-radius:14px;border:1px solid var(--line)}
+.lang-btn{padding:8px;border-radius:10px;border:0;background:transparent;color:var(--text);font-family:inherit;font-size:.85rem;font-weight:700;cursor:pointer}
+.lang-btn.active{background:var(--primary);color:#fff}
+.drawer-footer{margin-top:auto;padding-top:12px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:8px}
 </style>
 </head>
 <body>
@@ -106,12 +121,45 @@ nav button.active{color:var(--primary);background:var(--primary-soft);font-weigh
 <div id="app">
   <header>
     <div class="logo">🧱</div>
-    <div class="brand"><b>مخزن مواد البناء</b><span>إدارة المخزون والمبيعات</span></div>
-    <button class="menu-btn" id="menuBtn" title="إعادة ضبط البيانات">☰</button>
+    <div class="brand"><b id="brandTitle">مخزن مواد البناء</b><span id="brandSub">إدارة المخزون والمبيعات</span></div>
+    <button class="menu-btn" id="menuBtn" title="لوحة التحكم">☰</button>
   </header>
   <main id="main"></main>
 </div>
 <nav id="nav"></nav>
+
+<!-- لوحة التحكم الجانبية -->
+<div id="drawerOverlay">
+  <aside class="drawer-panel" id="drawerPanel">
+    <div class="drawer-top">
+      <div>
+        <b id="drawerTitle" style="display:block;font-size:1.05rem">لوحة التحكم</b>
+        <span id="drawerSub" style="font-size:.8rem;color:var(--muted)">إدارة المخزون واللغة</span>
+      </div>
+      <button class="drawer-close" id="drawerClose">✕</button>
+    </div>
+
+    <div class="drawer-section" id="langSectionTitle">اللغة / Langue / Language</div>
+    <div class="lang-box">
+      <button type="button" class="lang-btn active" data-lang="ar">العربية</button>
+      <button type="button" class="lang-btn" data-lang="fr">Français</button>
+      <button type="button" class="lang-btn" data-lang="en">English</button>
+    </div>
+
+    <div class="drawer-section" id="quickSectionTitle">وصول سريع</div>
+    <button type="button" class="drawer-item active" id="dNavHome"><span>🏠</span><span id="dLblHome">الرئيسية</span></button>
+    <button type="button" class="drawer-item" id="dQuickSale"><span>🧾</span><span id="dLblSale">بيع جديد</span></button>
+    <button type="button" class="drawer-item" id="dQuickStock"><span>📦</span><span id="dLblStock">إدارة المخزون</span></button>
+    <button type="button" class="drawer-item" id="dQuickCustomers"><span>👥</span><span id="dLblCustomers">الزبائن والديون</span></button>
+    <button type="button" class="drawer-item" id="dQuickSales"><span>📋</span><span id="dLblSales">المبيعات</span></button>
+
+    <div class="drawer-footer">
+      <button type="button" class="btn ghost sm" id="dResetBtn">إعادة ضبط البيانات</button>
+      <button type="button" class="btn ghost sm" style="color:var(--danger)" id="dLogoutBtn">تسجيل الخروج</button>
+    </div>
+  </aside>
+</div>
+
 <div class="overlay" id="overlay"><div class="sheet" id="sheet"></div></div>
 <div id="toast"></div>
 
@@ -141,7 +189,215 @@ loginForm.addEventListener("submit", function(e) {
 });
 
 const KEY = "depot-app-v2-zero";
+const LANG_KEY = "depot-app-lang";
 const $ = id => document.getElementById(id);
+
+const I18N = {
+  ar: {
+    dir: "rtl",
+    brandTitle: "مخزن مواد البناء",
+    brandSub: "إدارة المخزون والمبيعات",
+    drawerTitle: "لوحة التحكم",
+    drawerSub: "إدارة المخزون واللغة",
+    langSectionTitle: "اللغة / Langue / Language",
+    quickSectionTitle: "وصول سريع",
+    homeTitle: "لوحة التحكم",
+    homeSub: "ملخص نشاط مخزنك",
+    newSaleBtn: "+ بيع جديد",
+    todaySales: "مبيعات اليوم",
+    opsCount: "عملية",
+    totalIncome: "إجمالي الدخل",
+    productsLabel: "الأصناف",
+    unitsInStock: "وحدة في المخزون",
+    stockValue: "قيمة المخزون",
+    byBuyPrice: "بسعر الشراء",
+    outOfStockCount: "صنف نفد",
+    unpaidDebts: "ديون الزبائن غير المسددة",
+    recentSales: "آخر المبيعات",
+    viewAll: "عرض الكل",
+    noSalesYet: "لا توجد مبيعات بعد",
+    remAmount: "باقي",
+    watchStock: "مخزون يحتاج متابعة",
+    allStockOk: "كل الأصناف بكميات كافية ✓",
+    unitWord: "وحدة",
+    minLimit: "الحد الأدنى",
+    outBadge: "نفد",
+    leftBadge: "متبقي",
+    availBadge: "متوفر",
+    stockTitle: "المخزون",
+    stockSub: "كل الأصناف وكمياتها وأسعارها",
+    addProductBtn: "+ إضافة صنف جديد",
+    noProducts: "لا توجد أصناف",
+    buyShort: "شراء",
+    sellShort: "بيع",
+    restockBtn: "+ تزويد",
+    editBtn: "تعديل",
+    deleteBtn: "حذف",
+    salesTitle: "المبيعات",
+    salesSub: "سجل كل عمليات البيع",
+    customersTitle: "الزبائن",
+    customersSub: "مشترياتهم وديونهم غير المسددة",
+    noCustomers: "لا يوجد زبائن بعد",
+    debtBadge: "دين",
+    paidBadge: "مسدّد",
+    payDebtBtn: "تسديد دفعة",
+    navHome: "الرئيسية",
+    navStock: "المخزون",
+    navSales: "المبيعات",
+    navCustomers: "الزبائن",
+    resetConfirm: "إعادة ضبط كل البيانات؟ سيتم حذف كل المبيعات والأصناف والمبالغ والبدء من الصفر.",
+    resetDone: "تمت إعادة الضبط إلى الصفر",
+    resetBtn: "إعادة ضبط البيانات",
+    logoutBtn: "تسجيل الخروج"
+  },
+  fr: {
+    dir: "ltr",
+    brandTitle: "Dépôt Matériaux",
+    brandSub: "Gestion stock et ventes",
+    drawerTitle: "Tableau de bord",
+    drawerSub: "Gestion et langue",
+    langSectionTitle: "Langue / اللغة / Language",
+    quickSectionTitle: "Accès rapides",
+    homeTitle: "Tableau de bord",
+    homeSub: "Résumé de l'activité du dépôt",
+    newSaleBtn: "+ Nouvelle vente",
+    todaySales: "Ventes aujourd'hui",
+    opsCount: "opération(s)",
+    totalIncome: "Revenu total",
+    productsLabel: "Références",
+    unitsInStock: "unité(s) en stock",
+    stockValue: "Valeur du stock",
+    byBuyPrice: "Au prix d'achat",
+    outOfStockCount: "épuisée(s)",
+    unpaidDebts: "Dettes clients impayées",
+    recentSales: "Ventes récentes",
+    viewAll: "Tout voir",
+    noSalesYet: "Aucune vente enregistrée",
+    remAmount: "Reste",
+    watchStock: "Stock à surveiller",
+    allStockOk: "Tous les articles sont suffisants ✓",
+    unitWord: "unité",
+    minLimit: "Min",
+    outBadge: "Épuisé",
+    leftBadge: "restants",
+    availBadge: "en stock",
+    stockTitle: "Stock",
+    stockSub: "Articles, quantités et prix",
+    addProductBtn: "+ Ajouter un article",
+    noProducts: "Aucun article",
+    buyShort: "Achat",
+    sellShort: "Vente",
+    restockBtn: "+ Réappro",
+    editBtn: "Modifier",
+    deleteBtn: "Supprimer",
+    salesTitle: "Ventes",
+    salesSub: "Historique des ventes",
+    customersTitle: "Clients",
+    customersSub: "Achats et dettes impayées",
+    noCustomers: "Aucun client",
+    debtBadge: "Dette",
+    paidBadge: "Payé",
+    payDebtBtn: "Encaisser",
+    navHome: "Accueil",
+    navStock: "Stock",
+    navSales: "Ventes",
+    navCustomers: "Clients",
+    resetConfirm: "Réinitialiser toutes les données ? Toutes les ventes et articles seront supprimés.",
+    resetDone: "Réinitialisé à zéro",
+    resetBtn: "Réinitialiser les données",
+    logoutBtn: "Déconnexion"
+  },
+  en: {
+    dir: "ltr",
+    brandTitle: "Building Depot",
+    brandSub: "Stock & sales management",
+    drawerTitle: "Dashboard",
+    drawerSub: "Management & language",
+    langSectionTitle: "Language / اللغة / Langue",
+    quickSectionTitle: "Quick access",
+    homeTitle: "Dashboard",
+    homeSub: "Summary of your depot activity",
+    newSaleBtn: "+ New sale",
+    todaySales: "Today's sales",
+    opsCount: "sale(s)",
+    totalIncome: "Total revenue",
+    productsLabel: "Items",
+    unitsInStock: "unit(s) in stock",
+    stockValue: "Stock value",
+    byBuyPrice: "At buy price",
+    outOfStockCount: "out of stock",
+    unpaidDebts: "Unpaid customer debts",
+    recentSales: "Recent sales",
+    viewAll: "View all",
+    noSalesYet: "No sales yet",
+    remAmount: "Due",
+    watchStock: "Stock to watch",
+    allStockOk: "All items have sufficient stock ✓",
+    unitWord: "unit",
+    minLimit: "Min",
+    outBadge: "Out",
+    leftBadge: "left",
+    availBadge: "in stock",
+    stockTitle: "Inventory",
+    stockSub: "All items, quantities and prices",
+    addProductBtn: "+ Add new item",
+    noProducts: "No items",
+    buyShort: "Buy",
+    sellShort: "Sell",
+    restockBtn: "+ Restock",
+    editBtn: "Edit",
+    deleteBtn: "Delete",
+    salesTitle: "Sales",
+    salesSub: "All sales transactions",
+    customersTitle: "Customers",
+    customersSub: "Purchases and unpaid balances",
+    noCustomers: "No customers yet",
+    debtBadge: "Debt",
+    paidBadge: "Settled",
+    payDebtBtn: "Record payment",
+    navHome: "Home",
+    navStock: "Stock",
+    navSales: "Sales",
+    navCustomers: "Customers",
+    resetConfirm: "Reset all data? All sales, items and amounts will be cleared to zero.",
+    resetDone: "Reset to zero complete",
+    resetBtn: "Reset data",
+    logoutBtn: "Log out"
+  }
+};
+
+let currentLang = localStorage.getItem(LANG_KEY) || "ar";
+function tr(k) { return (I18N[currentLang] && I18N[currentLang][k]) || I18N.ar[k] || k; }
+
+function applyLanguage(lang) {
+  currentLang = I18N[lang] ? lang : "ar";
+  try { localStorage.setItem(LANG_KEY, currentLang); } catch (e) {}
+  const cfg = I18N[currentLang];
+  document.documentElement.lang = currentLang;
+  document.documentElement.dir = cfg.dir;
+  document.getElementById("app").dir = cfg.dir;
+  $("drawerPanel").dir = cfg.dir;
+  $("nav").dir = cfg.dir;
+
+  $("brandTitle").textContent = cfg.brandTitle;
+  $("brandSub").textContent = cfg.brandSub;
+  $("drawerTitle").textContent = cfg.drawerTitle;
+  $("drawerSub").textContent = cfg.drawerSub;
+  $("langSectionTitle").textContent = cfg.langSectionTitle;
+  $("quickSectionTitle").textContent = cfg.quickSectionTitle;
+  $("dLblHome").textContent = cfg.navHome;
+  $("dLblSale").textContent = cfg.newSaleBtn.replace("+ ", "");
+  $("dLblStock").textContent = cfg.stockTitle;
+  $("dLblCustomers").textContent = cfg.customersTitle;
+  $("dLblSales").textContent = cfg.salesTitle;
+  $("dResetBtn").textContent = cfg.resetBtn;
+  $("dLogoutBtn").textContent = cfg.logoutBtn;
+
+  document.querySelectorAll(".lang-btn").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.lang === currentLang);
+  });
+  render();
+}
 
 function el(tag, cls, text) {
   const e = document.createElement(tag);
@@ -152,7 +408,6 @@ function el(tag, cls, text) {
 function pad(n) { return String(n).padStart(2, "0"); }
 function dateStr(d) { return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); }
 function today() { return dateStr(new Date()); }
-function daysAgo(n) { const d = new Date(); d.setDate(d.getDate() + n); return dateStr(d); }
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
 function money(n) { return Math.round(n || 0).toLocaleString("en-US") + " MRU"; }
 function num(n) { return Math.round(n || 0).toLocaleString("en-US"); }
@@ -202,9 +457,9 @@ function stats() {
 }
 
 function stockBadge(p) {
-  if (p.stock <= 0) return el("span", "badge b-out", "نفد");
-  if (p.stock <= p.min) return el("span", "badge b-warn", p.stock + " متبقي");
-  return el("span", "badge b-ok", p.stock + " متوفر");
+  if (p.stock <= 0) return el("span", "badge b-out", tr("outBadge"));
+  if (p.stock <= p.min) return el("span", "badge b-warn", p.stock + " " + tr("leftBadge"));
+  return el("span", "badge b-ok", p.stock + " " + tr("availBadge"));
 }
 
 function statCard(icon, bg, label, value, hint) {
@@ -233,7 +488,7 @@ function sectionTitle(text, link) {
 
 function salesList(list) {
   const c = el("div", "card list");
-  if (!list.length) { c.appendChild(el("div", "empty", "لا توجد مبيعات بعد")); return c; }
+  if (!list.length) { c.appendChild(el("div", "empty", tr("noSalesYet"))); return c; }
   list.forEach(s => {
     const r = el("div", "row");
     const ic = el("div", "ico", "🧾");
@@ -247,7 +502,7 @@ function salesList(list) {
     right.style.textAlign = "left";
     right.appendChild(el("div", "amount", money(s.total)));
     const rem = s.total - s.paid;
-    if (rem > 0) right.appendChild(el("span", "badge b-credit", "باقي " + num(rem)));
+    if (rem > 0) right.appendChild(el("span", "badge b-credit", tr("remAmount") + " " + num(rem)));
     r.appendChild(right);
     c.appendChild(r);
   });
@@ -257,59 +512,41 @@ function salesList(list) {
 function buildHome() {
   const s = stats();
   const wrap = el("div");
-  wrap.appendChild(el("h1", "", "لوحة التحكم"));
-  wrap.appendChild(el("p", "sub", "ملخص نشاط مخزنك"));
-  const big = el("button", "btn block", "+ بيع جديد");
+  wrap.appendChild(el("h1", "", tr("homeTitle")));
+  wrap.appendChild(el("p", "sub", tr("homeSub")));
+  const big = el("button", "btn block", tr("newSaleBtn"));
   big.onclick = () => openSale();
   wrap.appendChild(big);
 
   const grid = el("div", "stats");
-  grid.appendChild(statCard("🧾", "var(--orange-soft)", "مبيعات اليوم", money(s.todayAmt), s.todayCount + " عملية"));
-  grid.appendChild(statCard("💰", "var(--green-soft)", "إجمالي الدخل", money(s.revenue), s.salesCount + " عملية"));
-  grid.appendChild(statCard("📦", "var(--primary-soft)", "الأصناف", num(s.refs), num(s.units) + " وحدة في المخزون"));
-  grid.appendChild(statCard("🧱", "var(--purple-soft)", "قيمة المخزون", money(s.value), s.out ? s.out + " صنف نفد" : "بسعر الشراء"));
+  grid.appendChild(statCard("🧾", "var(--orange-soft)", tr("todaySales"), money(s.todayAmt), s.todayCount + " " + tr("opsCount")));
+  grid.appendChild(statCard("💰", "var(--green-soft)", tr("totalIncome"), money(s.revenue), s.salesCount + " " + tr("opsCount")));
+  grid.appendChild(statCard("📦", "var(--primary-soft)", tr("productsLabel"), num(s.refs), num(s.units) + " " + tr("unitsInStock")));
+  grid.appendChild(statCard("🧱", "var(--purple-soft)", tr("stockValue"), money(s.value), s.out ? s.out + " " + tr("outOfStockCount") : tr("byBuyPrice")));
   wrap.appendChild(grid);
 
   if (s.debt > 0) {
     const d = el("div", "card");
     d.style.cssText = "padding:14px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px";
-    d.appendChild(el("span", "", "ديون الزبائن غير المسددة"));
+    d.appendChild(el("span", "", tr("unpaidDebts")));
     const a = el("span", "amount", money(s.debt));
     a.style.color = "var(--orange)";
     d.appendChild(a);
     wrap.appendChild(d);
   }
 
-  wrap.appendChild(sectionTitle("وصول سريع"));
-  const q = el("div", "quick");
-  [
-    ["🧾", "بيع جديد", "var(--orange-soft)", () => openSale()],
-    ["📦", "إدارة المخزون", "var(--primary-soft)", () => go("stock")],
-    ["👥", "الزبائن والديون", "var(--green-soft)", () => go("customers")]
-  ].forEach(([i, t, bg, fn]) => {
-    const b = el("button");
-    const ic = el("span", "ico", i);
-    ic.style.background = bg;
-    b.appendChild(ic);
-    b.appendChild(el("span", "", t));
-    b.appendChild(el("span", "arrow", "←"));
-    b.onclick = fn;
-    q.appendChild(b);
-  });
-  wrap.appendChild(q);
-
-  wrap.appendChild(sectionTitle("آخر المبيعات", ["عرض الكل", () => go("sales")]));
+  wrap.appendChild(sectionTitle(tr("recentSales"), [tr("viewAll"), () => go("sales")]));
   wrap.appendChild(salesList(db.sales.slice(0, 4)));
 
-  wrap.appendChild(sectionTitle("مخزون يحتاج متابعة"));
+  wrap.appendChild(sectionTitle(tr("watchStock")));
   const low = db.products.filter(p => p.stock <= p.min);
   const lc = el("div", "card list");
-  if (!low.length) lc.appendChild(el("div", "empty", "كل الأصناف بكميات كافية ✓"));
+  if (!low.length) lc.appendChild(el("div", "empty", tr("allStockOk")));
   low.forEach(p => {
     const r = el("div", "row");
     const m = el("div", "meta");
     m.appendChild(el("div", "name", p.name));
-    m.appendChild(el("div", "sub2", p.unit + " · الحد الأدنى " + p.min));
+    m.appendChild(el("div", "sub2", (p.unit || tr("unitWord")) + " · " + tr("minLimit") + " " + p.min));
     r.appendChild(m);
     r.appendChild(stockBadge(p));
     lc.appendChild(r);
@@ -320,30 +557,30 @@ function buildHome() {
 
 function buildStock() {
   const wrap = el("div");
-  wrap.appendChild(el("h1", "", "المخزون"));
-  wrap.appendChild(el("p", "sub", "كل الأصناف وكمياتها وأسعارها"));
-  const add = el("button", "btn block", "+ إضافة صنف جديد");
+  wrap.appendChild(el("h1", "", tr("stockTitle")));
+  wrap.appendChild(el("p", "sub", tr("stockSub")));
+  const add = el("button", "btn block", tr("addProductBtn"));
   add.onclick = () => openProduct(null);
   wrap.appendChild(add);
 
   const list = el("div", "card list");
   list.style.marginTop = "16px";
-  if (!db.products.length) list.appendChild(el("div", "empty", "لا توجد أصناف"));
+  if (!db.products.length) list.appendChild(el("div", "empty", tr("noProducts")));
   db.products.forEach(p => {
     const r = el("div", "row");
     const m = el("div", "meta");
     m.appendChild(el("div", "name", p.name));
-    m.appendChild(el("div", "sub2", "شراء " + num(p.buy) + " · بيع " + num(p.sell) + " · " + p.unit));
+    m.appendChild(el("div", "sub2", tr("buyShort") + " " + num(p.buy) + " · " + tr("sellShort") + " " + num(p.sell) + " · " + p.unit));
     r.appendChild(m);
     r.appendChild(stockBadge(p));
     list.appendChild(r);
 
     const a = el("div", "actions");
-    const b1 = el("button", "btn ghost sm", "+ تزويد");
+    const b1 = el("button", "btn ghost sm", tr("restockBtn"));
     b1.onclick = () => openRestock(p);
-    const b2 = el("button", "btn ghost sm", "تعديل");
+    const b2 = el("button", "btn ghost sm", tr("editBtn"));
     b2.onclick = () => openProduct(p);
-    const b3 = el("button", "btn ghost sm", "حذف");
+    const b3 = el("button", "btn ghost sm", tr("deleteBtn"));
     b3.style.color = "var(--danger)";
     b3.onclick = () => deleteProduct(p);
     a.append(b1, b2, b3);
@@ -355,9 +592,9 @@ function buildStock() {
 
 function buildSales() {
   const wrap = el("div");
-  wrap.appendChild(el("h1", "", "المبيعات"));
-  wrap.appendChild(el("p", "sub", "سجل كل عمليات البيع"));
-  const b = el("button", "btn block", "+ بيع جديد");
+  wrap.appendChild(el("h1", "", tr("salesTitle")));
+  wrap.appendChild(el("p", "sub", tr("salesSub")));
+  const b = el("button", "btn block", tr("newSaleBtn"));
   b.onclick = () => openSale();
   wrap.appendChild(b);
   const c = el("div");
@@ -381,11 +618,11 @@ function customersMap() {
 
 function buildCustomers() {
   const wrap = el("div");
-  wrap.appendChild(el("h1", "", "الزبائن"));
-  wrap.appendChild(el("p", "sub", "مشترياتهم وديونهم غير المسددة"));
+  wrap.appendChild(el("h1", "", tr("customersTitle")));
+  wrap.appendChild(el("p", "sub", tr("customersSub")));
   const list = el("div", "card list");
   const cs = customersMap();
-  if (!cs.length) list.appendChild(el("div", "empty", "لا يوجد زبائن بعد"));
+  if (!cs.length) list.appendChild(el("div", "empty", tr("noCustomers")));
   cs.forEach(c => {
     const r = el("div", "row");
     const ic = el("div", "ico", "👤");
@@ -393,21 +630,21 @@ function buildCustomers() {
     r.appendChild(ic);
     const m = el("div", "meta");
     m.appendChild(el("div", "name", c.name));
-    m.appendChild(el("div", "sub2", c.count + " عملية · إجمالي " + money(c.total)));
+    m.appendChild(el("div", "sub2", c.count + " " + tr("opsCount") + " · " + money(c.total)));
     r.appendChild(m);
     const right = el("div");
     right.style.textAlign = "left";
     if (c.debt > 0) {
       right.appendChild(el("div", "amount", money(c.debt)));
-      right.appendChild(el("span", "badge b-credit", "دين"));
+      right.appendChild(el("span", "badge b-credit", tr("debtBadge")));
     } else {
-      right.appendChild(el("span", "badge b-ok", "مسدّد"));
+      right.appendChild(el("span", "badge b-ok", tr("paidBadge")));
     }
     r.appendChild(right);
     list.appendChild(r);
     if (c.debt > 0) {
       const a = el("div", "actions");
-      const b = el("button", "btn sm", "تسديد دفعة");
+      const b = el("button", "btn sm", tr("payDebtBtn"));
       b.onclick = () => openPayDebt(c);
       a.appendChild(b);
       list.appendChild(a);
@@ -425,7 +662,7 @@ function render() {
 
   const nav = $("nav");
   nav.innerHTML = "";
-  [["home", "🏠", "الرئيسية"], ["stock", "📦", "المخزون"], ["sales", "🧾", "المبيعات"], ["customers", "👥", "الزبائن"]]
+  [["home", "🏠", tr("navHome")], ["stock", "📦", tr("navStock")], ["sales", "🧾", tr("navSales")], ["customers", "👥", tr("navCustomers")]]
     .forEach(([k, i, t]) => {
       const b = el("button", view === k ? "active" : "");
       b.appendChild(el("span", "n-ico", i));
@@ -433,9 +670,50 @@ function render() {
       b.onclick = () => go(k);
       nav.appendChild(b);
     });
+
+  $("dNavHome").classList.toggle("active", view === "home");
+  $("dQuickStock").classList.toggle("active", view === "stock");
+  $("dQuickSales").classList.toggle("active", view === "sales");
+  $("dQuickCustomers").classList.toggle("active", view === "customers");
   window.scrollTo(0, 0);
 }
 function go(v) { view = v; render(); }
+
+/* ---------- لوحة التحكم الجانبية ---------- */
+function openDrawer() { $("drawerOverlay").classList.add("show"); }
+function closeDrawer() { $("drawerOverlay").classList.remove("show"); }
+
+$("menuBtn").onclick = openDrawer;
+$("drawerClose").onclick = closeDrawer;
+$("drawerOverlay").addEventListener("click", e => { if (e.target.id === "drawerOverlay") closeDrawer(); });
+
+document.querySelectorAll(".lang-btn").forEach(btn => {
+  btn.onclick = () => applyLanguage(btn.dataset.lang);
+});
+
+$("dNavHome").onclick = () => { closeDrawer(); go("home"); };
+$("dQuickSale").onclick = () => { closeDrawer(); openSale(); };
+$("dQuickStock").onclick = () => { closeDrawer(); go("stock"); };
+$("dQuickSales").onclick = () => { closeDrawer(); go("sales"); };
+$("dQuickCustomers").onclick = () => { closeDrawer(); go("customers"); };
+
+$("dResetBtn").onclick = () => {
+  closeDrawer();
+  if (!confirm(tr("resetConfirm"))) return;
+  try { localStorage.removeItem(KEY); } catch (e) {}
+  db = seed();
+  save();
+  view = "home";
+  render();
+  toast(tr("resetDone"));
+};
+
+$("dLogoutBtn").onclick = () => {
+  closeDrawer();
+  sessionStorage.removeItem("depot_logged_in");
+  $("loginPass").value = "";
+  loginScreen.style.display = "flex";
+};
 
 /* ---------- نافذة النماذج ---------- */
 function openForm(title, fields, submitText, onSubmit, onLive) {
@@ -629,17 +907,7 @@ function openPayDebt(c) {
   });
 }
 
-$("menuBtn").onclick = () => {
-  if (!confirm("إعادة ضبط كل البيانات؟ سيتم حذف كل المبيعات والأصناف والمبالغ والبدء من الصفر.")) return;
-  try { localStorage.removeItem(KEY); } catch (e) {}
-  db = seed();
-  save();
-  view = "home";
-  render();
-  toast("تمت إعادة الضبط إلى الصفر");
-};
-
-render();
+applyLanguage(currentLang);
 </script>
 </body>
 </html>
