@@ -12,11 +12,14 @@ html,body{margin:0}
 body{font-family:"Segoe UI",Tahoma,Arial,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:calc(92px + env(safe-area-inset-bottom,0px))}
 
 /* واجهة تسجيل الدخول الأولى */
-#loginScreen{position:fixed;inset:0;background:#ffffff;z-index:100;display:flex;flex-direction:column;justify-content:center;padding:24px;overflow:auto}
+#loginScreen{position:fixed;inset:0;background:#ffffff;z-index:100;display:flex;flex-direction:column;justify-content:flex-start;padding:calc(16px + env(safe-area-inset-top,0px)) 22px 28px;overflow:auto}
 #loginScreen .login-box{width:100%;max-width:440px;margin:0 auto}
-#loginScreen .login-logo{width:56px;height:56px;border-radius:16px;background:var(--primary);color:#fff;display:grid;place-items:center;font-size:26px;margin-bottom:18px;box-shadow:0 8px 18px rgba(29,92,255,.25)}
-#loginScreen h2{margin:0 0 6px;font-size:1.6rem;color:#1a2233}
-#loginScreen p{margin:0 0 24px;color:#6b7689;font-size:.95rem}
+#loginScreen .top-banner-wrap{width:100%;border-radius:20px;overflow:hidden;border:1px solid #e6eaf2;box-shadow:0 8px 22px rgba(20,40,90,.08);margin-bottom:26px;background:#0f172a}
+#loginScreen .top-banner-wrap img{display:block;width:100%;height:190px;object-fit:cover}
+#loginScreen .login-header-row{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+#loginScreen .login-logo{width:46px;height:46px;border-radius:14px;background:var(--primary);color:#fff;display:grid;place-items:center;font-size:22px;box-shadow:0 8px 18px rgba(29,92,255,.25);flex:none}
+#loginScreen h2{margin:0 0 4px;font-size:1.5rem;color:#1a2233}
+#loginScreen p{margin:0 0 22px;color:#6b7689;font-size:.93rem}
 #loginScreen .l-field{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
 #loginScreen .l-field label{font-size:.9rem;font-weight:600;color:#1a2233}
 #loginScreen .l-field input{padding:15px;border-radius:14px;border:1.5px solid #e6eaf2;background:#f8fafc;color:#1a2233;font-size:1rem;font-family:inherit;width:100%;direction:ltr;text-align:left;outline:none}
@@ -86,8 +89,15 @@ nav button.active{color:var(--primary);background:var(--primary-soft);font-weigh
 <!-- الواجهة الأولى: تسجيل الدخول -->
 <div id="loginScreen">
   <div class="login-box">
-    <div class="login-logo">🔒</div>
-    <h2>تسجيل الدخول</h2>
+    <div class="top-banner-wrap">
+      <img src="./kankri-bachir-banner.jpg" alt="كنكري بشير — KANKRI BACHIR">
+    </div>
+    <div class="login-header-row">
+      <div class="login-logo">🔒</div>
+      <div>
+        <h2>تسجيل الدخول</h2>
+      </div>
+    </div>
     <p>أدخل البريد الإلكتروني وكلمة السر للمتابعة</p>
     <div id="loginError">المعلومات غير صحيحة</div>
     <form id="loginForm" novalidate>
