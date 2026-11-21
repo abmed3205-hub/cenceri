@@ -1,0 +1,21 @@
+{
+  "name": "مخزن مواد البناء",
+  "short_name": "مخزن البناء",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1d5cff",
+  "icons": [
+    {
+      "src": "./kankri-bachir-banner.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "./kankri-bachir-banner.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}
